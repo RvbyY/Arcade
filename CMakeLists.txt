@@ -11,6 +11,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(arcade
     src/main.cpp
+    src/graphics/ncurses/Ncurses.cpp
 )
 
 add_library(arcadeNcurses SHARED
@@ -29,3 +30,7 @@ target_include_directories(MyLibrary PUBLIC include)
 
 add_executable(MyApp main.cpp)
 target_link_libraries(MyApp PRIVATE MyLibrary)
+
+target_include_directories(arcade_interfaces INTERFACE
+    ${CMAKE_SOURCE_DIR}/include
+)
