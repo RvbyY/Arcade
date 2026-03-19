@@ -16,10 +16,6 @@ public:
     }
 };
 
-extern "C" IGraphic* create() {
-    return new NcursesGraphic();
-}
+extern "C" IGraphic* create();
 
-extern "C" void destroy(IGraphic* graphic) {
-    delete graphic;
-}
+extern "C" void destroy(IGraphic* graphic);
