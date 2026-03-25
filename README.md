@@ -306,8 +306,8 @@ Run the project with:
 
 **Using [cmake](https://isocpp.org/):**
 ```sh
-$ cmake --build .
-$ ./arcade ./lib/*.so
+cmake --build .
+./arcade ./lib/*.so
 ```
 
 ### Testing
