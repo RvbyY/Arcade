@@ -55,3 +55,10 @@ add_arcade_lib(arcade_sdl2
 )
 
 # ─── Game libraries ───────────────────────────────────────────────────────────
+
+# ─── Project Tests ────────────────────────────────────────────────────────────
+
+include(CTest)
+enable_testing()
+add_executable(TestInstantiator tests/test_parsing.cpp)
+add_test(NAME TestParsing COMMAND TestInstantiator WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
