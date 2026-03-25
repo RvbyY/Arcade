@@ -5,7 +5,7 @@
 
 <img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
 
-# <code>❯ ARCADE </code>
+# <code> ARCADE </code>
 
 <em></em>
 
@@ -48,10 +48,12 @@
 
 Arcade is a gaming platform : a program that lets the user choose a game to play and keeps a register of
 player scores.
+
 To be able to deal with the elements of your gaming plateform at run-time, your graphics libraries and
 your games must be implemented as dynamic libraries, loaded at run-time. Each GUI available for the
 program must be used as a shared library that will be loaded and used dynamically by the main program.
 This also applies to your games.
+
 ---
 
 ## Features
