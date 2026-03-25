@@ -3,7 +3,7 @@
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
 
-<img src="readmeai/assets/logos/purple.svg" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
+<img src="assets/pngegg.png" width="30%" style="position: relative; top: 0; right: 0;" alt="Project Logo"/>
 
 # <code> ARCADE </code>
 
@@ -276,15 +276,15 @@ Build  from the source and intsall dependencies:
 
 1. **Clone the repository:**
 
-    ```sh
-    ❯ git clone ../
-    ```
+ ```sh
+git clone ../
+ ```
 
 2. **Navigate to the project directory:**
 
-    ```sh
-    ❯ cd 
-    ```
+```sh
+cd 
+```
 
 3. **Install the dependencies:**
 
@@ -297,7 +297,7 @@ Build  from the source and intsall dependencies:
 	**Using [cmake](https://isocpp.org/):**
 
 	```sh
-	❯ cmake . && make
+	cmake . && make
 	```
 
 ### Usage
