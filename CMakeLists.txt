@@ -31,25 +31,27 @@ macro(add_arcade_lib NAME)
 endmacro()
 
 # ─── Arcade lib ───────────────────────────────────────────────────────────────
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/lib/libarcade/include)
 
 include(ExternalProject)
 ExternalProject_Add(libarcade
     GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
-    GIT_TAG main
-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/libarcade
+    GIT_TAG        main
+    SOURCE_DIR     ${CMAKE_SOURCE_DIR}/lib/libarcade
+    UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make no-repo
+    BUILD_COMMAND  make no-repo
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
 )
+
 add_dependencies(arcade libarcade)
-target_include_directories(arcade PUBLIC lib/libarcade)
+target_include_directories(arcade PUBLIC ${CMAKE_SOURCE_DIR}/lib/libarcade)
 
 # ─── Graphics libraries ───────────────────────────────────────────────────────
 add_arcade_lib(arcade_ncurses
     src/graphics/ncurses/Ncurses.cpp
 )
-
 add_arcade_lib(arcade_sdl2
     src/graphics/SDL2/SDL2.cpp
 )
