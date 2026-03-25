@@ -18,7 +18,6 @@
 <img alt="Static Badge" src="https://img.shields.io/badge/sfml-green?style=plastic&logo=appveyor&logoColor=green&logoSize=auto">
 <img alt="Static Badge" src="https://img.shields.io/badge/ncurses-black?style=flat&logo=ncurses&logoColor=white">
 <img alt="Static Badge" src="https://img.shields.io/badge/cpp-blue?style=flat&logo=c%2B%2B&logoColor=white">
-<img alt="Static Badge" src="https://img.shields.io/badge/cmake-red?style=flat&logo=CMAKE&logoColor=white">
 
 
 </div>
