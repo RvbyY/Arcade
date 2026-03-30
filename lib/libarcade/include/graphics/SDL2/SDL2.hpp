@@ -1,5 +1,6 @@
 #include "Arcade/display.hpp"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 class SDL2Graphic : public Arcade::IDisplay {
 
@@ -36,7 +37,9 @@ public:
 
     SDL_Window   *_window   = nullptr;
     SDL_Renderer *_renderer = nullptr;
+    TTF_Font* _font;
 
 private:
+
     bool _isWinOpen = false;
 };

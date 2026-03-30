@@ -46,6 +46,10 @@ void NcursesGraphic::display()
 
 void NcursesGraphic::draw(const Arcade::Shapes::Point& point)
 {
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+    if (point.x >= maxX || point.y >= maxY || point.x < 0 || point.y < 0)
+        return;
     // Map your color to an ncurses color pair (assumes you've set up color pairs)
     attron(COLOR_PAIR(point.color));
     mvaddch(point.y, point.x, '#');   // or whatever char represents a point
@@ -54,13 +58,17 @@ void NcursesGraphic::draw(const Arcade::Shapes::Point& point)
 
 void NcursesGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 {
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+    if (rect.x >= maxX || rect.y >= maxY || rect.x < 0 || rect.y < 0)
+        return;
     attron(COLOR_PAIR(rect.color));
 
     for (int y = rect.y; y < rect.y + rect.height; y++) {
         for (int x = rect.x; x < rect.x + rect.width; x++) {
             bool isBorder = (y == rect.y || y == rect.y + rect.height - 1 ||
                              x == rect.x || x == rect.x + rect.width - 1);
-            mvaddch(y, x, isBorder ? rect.width : rect.height);
+            mvaddch(y, x, isBorder ? '#' : ' ');
         }
     }
 
@@ -69,6 +77,10 @@ void NcursesGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 
 void NcursesGraphic::draw(const Arcade::Text& text)
 {
+    int maxY, maxX;
+    getmaxyx(stdscr, maxY, maxX);
+    if (text.x >= maxX || text.y >= maxY || text.x < 0 || text.y < 0)
+        return;
     attron(COLOR_PAIR(text.color));
     mvprintw(text.y, text.x, "%s", text.content.c_str());
     attroff(COLOR_PAIR(text.color));
