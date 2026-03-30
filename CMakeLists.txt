@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 project(Arcade VERSION 0.1.0 LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 # ─── Output directories ───────────────────────────────────────────────────────
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})        # arcade binary → root
@@ -37,21 +37,23 @@ set(LIBARCADE_MAKEFILE ${LIBARCADE_SRC_DIR}/Makefile)
 if (EXISTS "${LIBARCADE_MAKEFILE}")
     set(LIBARCADE_BUILD_CMD ${CMAKE_MAKE_PROGRAM} no-repo)
 else()
-    set(LIBARCADE_BUILD_CMD ${CMAKE_COMMAND} -E echo "libarcade: no Makefile, skipping build")
+    set(LIBARCADE_BUILD_CMD "")
 endif()
+
 
 ExternalProject_Add(libarcade
     GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
     GIT_TAG main
     SOURCE_DIR ${LIBARCADE_SRC_DIR}
-    DOWNLOAD_COMMAND ""
     UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${LIBARCADE_BUILD_CMD}
+    # BUILD_COMMAND ${LIBARCADE_BUILD_CMD}
+    BUILD_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
 )
 add_dependencies(arcade libarcade)
+
 target_include_directories(arcade PUBLIC lib/libarcade)
 
 # ─── Graphics libraries ───────────────────────────────────────────────────────

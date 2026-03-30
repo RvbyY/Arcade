@@ -1,37 +1,40 @@
 #include <dlfcn.h>
 #include <iostream>
-#include "../lib/libarcade/Arcade/game.hpp"
-#include "../lib/libarcade/Arcade/display.hpp"
+#include "Arcade/game.hpp"
+#include "Arcade/display.hpp"
+#include "Arcade/utils.hpp"
 
-int main()
+int main(int ac, char **av)
 {
         Arcade::Color color(255, 0, 0);
     std::cout << "Color: " << (int)color.red << ", " << (int)color.green << ", " << (int)color.blue << std::endl;
 
-    void* handle = dlopen("./lib/arcade_ncurses.so", RTLD_NOW);
+    void* handle = dlopen(av[1], RTLD_NOW);
     if (!handle) {
         std::cerr << dlerror() << std::endl;
         return 1;
     }
 
-    using create_t = Arcade::IDisplay* (*)();
-    using destroy_t = void (*)(Arcade::IDisplay*);
+    auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(handle, "get_display");
+    // destroy_t destroy = (destroy_t)dlsym(handle, "destroy");
 
-    create_t create = (create_t)dlsym(handle, "create");
-    destroy_t destroy = (destroy_t)dlsym(handle, "destroy");
-
-    if (!create || !destroy) {
-        std::cerr << "Symbol error\n";
+    if (!createDisplay) {
+        std::cerr << "Not a game library.\n";
         return 1;
     }
 
-    Arcade::IDisplay* graphic = create();
+    Arcade::IDisplay* graphic = createDisplay();
 
     graphic->open();
+
+    graphic->draw(Arcade::Text{"hihi"});
     graphic->display();
+
+    char c;
+    std::cin >> c;
     graphic->close();
 
-    destroy(graphic);
+    delete graphic;
     dlclose(handle);
 
     return 0;

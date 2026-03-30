@@ -109,7 +109,7 @@ namespace Arcade {
              * If no event is currently queued or
              * actioned, none is returned.
              */
-            virtual std::optional<Event> pollEvent() = 0;
+            virtual std::optional<Events::Event> pollEvent() = 0;
 
             /**
              * Retrieves the coordinates of the mouse

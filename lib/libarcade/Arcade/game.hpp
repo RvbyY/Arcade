@@ -10,11 +10,12 @@
 #pragma once
 
 #include <chrono>
+#include "utils/events.hpp"
 
 
 namespace Arcade {
     class IDisplay;
-    enum class Event;
+    struct Player;
 
     class IGame {
         public:
@@ -96,7 +97,7 @@ namespace Arcade {
              * function. Polling for events should
              * ONLY be done by the Core.
              */
-            virtual void handleEvent(Event evt, IDisplay& display) = 0;
+            virtual void handleEvent(Events::Event evt, IDisplay& display) = 0;
 
             /**
              * Updates the game's state by a single tick.
@@ -110,7 +111,7 @@ namespace Arcade {
              * std::chrono::steady_clock::now(), as it's made
              * precisly for this purpose.
              */
-            virtual void update(std::chrono::nanoseconds dt) = 0;
+            virtual void update(std::chrono::nanoseconds dt, Player& player) = 0;
 
             /**
              * Renders the game's current frame on the
