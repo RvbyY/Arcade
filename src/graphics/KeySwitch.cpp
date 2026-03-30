@@ -1,4 +1,4 @@
-#include "include/graphics/ncurses/Ncurses.hpp"
+#include "../../include/graphics/Ncurses/Ncurses.hpp"
 
 std::optional<Arcade::Event> switchCaseKey(int ch)
 {

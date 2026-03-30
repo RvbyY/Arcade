@@ -1,5 +1,5 @@
-#include "include/graphics/ncurses/Ncurses.hpp"
-#include "Arcade/utils/types.hpp"
+#include "../../../include/graphics/Ncurses/Ncurses.hpp"
+#include "../../../lib/libarcade/Arcade/utils/types.hpp"
 #include <ncurses.h>
 #include <utility>
 

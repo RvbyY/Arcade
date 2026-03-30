@@ -1,5 +1,5 @@
-#include "include/graphics/SDL2/SDL2.hpp"
-#include "Arcade/utils/types.hpp"
+#include "../../../include/graphics/SDL2/SDL2.hpp"
+#include "../../../lib/libarcade/Arcade/utils/types.hpp"
 #include <SDL2/SDL.h>
 
 void SDL2Graphic::open()

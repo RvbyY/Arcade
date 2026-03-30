@@ -1,7 +1,7 @@
 #include <dlfcn.h>
 #include <iostream>
-#include "Arcade/game.hpp"
-#include "Arcade/display.hpp"
+#include "../lib/libarcade/Arcade/game.hpp"
+#include "../lib/libarcade/Arcade/display.hpp"
 
 int main()
 {

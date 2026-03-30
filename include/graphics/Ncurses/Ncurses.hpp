@@ -1,8 +1,7 @@
 #include "../../../lib/libarcade/Arcade/display.hpp"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <ncurses.h>
 
-class SDL2Graphic : public Arcade::IDisplay {
+class NcursesGraphic : public Arcade::IDisplay {
 
 public:
     void open() override;
@@ -35,11 +34,8 @@ public:
 
     std::optional<Arcade::Event> switchCaseKey(int);
 
-    SDL_Window   *_window   = nullptr;
-    SDL_Renderer *_renderer = nullptr;
-    TTF_Font* _font;
+    WINDOW *_window;
 
 private:
-
     bool _isWinOpen = false;
 };
