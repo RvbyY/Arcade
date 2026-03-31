@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 
     Arcade::Color color(255, 0, 0);
 
-    void* handle = dlopen(argv[1], RTLD_LAZY);
+    void* handle = dlopen(argv[1], RTLD_NOW);
     if (!handle) {
         std::cerr << dlerror() << std::endl;
         return 1;

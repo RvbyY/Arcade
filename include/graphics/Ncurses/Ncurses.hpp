@@ -32,7 +32,7 @@ public:
 
     bool getIsWinOpen() const;
 
-    std::optional<Arcade::Event> switchCaseKey(int);
+    std::optional<Arcade::Event> KeySwitch(int);
 
     WINDOW *_window;
 

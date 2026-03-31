@@ -33,7 +33,7 @@ public:
 
     bool getIsWinOpen() const;
 
-    std::optional<Arcade::Event> switchCaseKey(int);
+    std::optional<Arcade::Event> KeySwitch(int);
 
     SDL_Window   *_window   = nullptr;
     SDL_Renderer *_renderer = nullptr;

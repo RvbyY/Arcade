@@ -100,7 +100,7 @@ std::optional<Arcade::Event> NcursesGraphic::pollEvent()
 {
     int ch = wgetch(_window);
 
-    return NcursesGraphic::switchCaseKey(ch);
+    return NcursesGraphic::KeySwitch(ch);
 }
 
 std::pair<Arcade::Coordinate, Arcade::Coordinate> NcursesGraphic::mousePosition() const

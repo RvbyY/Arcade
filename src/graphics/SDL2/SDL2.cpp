@@ -87,7 +87,7 @@ std::optional<Arcade::Event> SDL2Graphic::pollEvent()
 {
     SDL_Event event;
 
-    return switchCaseKey(event.key.keysym.sym);
+    return KeySwitch(event.key.keysym.sym);
 }
 
 std::pair<Arcade::Coordinate, Arcade::Coordinate> SDL2Graphic::mousePosition() const
