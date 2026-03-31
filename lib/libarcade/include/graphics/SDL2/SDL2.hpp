@@ -1,4 +1,4 @@
-#include "../../../lib/libarcade/Arcade/display.hpp"
+#include "Arcade/display.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
@@ -33,7 +33,7 @@ public:
 
     bool getIsWinOpen() const;
 
-    std::optional<Arcade::Event> KeySwitch(int);
+    std::optional<Arcade::Event> switchCaseKey(int);
 
     SDL_Window   *_window   = nullptr;
     SDL_Renderer *_renderer = nullptr;

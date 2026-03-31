@@ -1,34 +1,44 @@
 #include <dlfcn.h>
 #include <iostream>
-#include "graphics/IGraphic.hpp"
+#include "../lib/libarcade/Arcade/display.hpp"
+#include "Arcade/utils/text.hpp"
 
-int main()
+int main(int argc, char* argv[])
 {
-    void* handle = dlopen("./lib/arcade_ncurses.so", RTLD_NOW);
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <path_to_graphic_lib>" << std::endl;
+        return 1;
+    }
+
+    Arcade::Color color(255, 0, 0);
+
+    void* handle = dlopen(argv[1], RTLD_NOW);
     if (!handle) {
         std::cerr << dlerror() << std::endl;
         return 1;
     }
 
-    using create_t = IGraphic* (*)();
-    using destroy_t = void (*)(IGraphic*);
+    using create_t = Arcade::IDisplay* (*)();
+    using destroy_t = void (*)(Arcade::IDisplay*);
 
     create_t create = (create_t)dlsym(handle, "create");
     destroy_t destroy = (destroy_t)dlsym(handle, "destroy");
 
     if (!create || !destroy) {
         std::cerr << "Symbol error\n";
+        dlclose(handle);
         return 1;
     }
 
-    IGraphic* graphic = create();
+    Arcade::IDisplay* graphic = create();
+    graphic->open();
+    graphic->draw(Arcade::Text{"lol"});
+    graphic->display();
 
-    graphic->init();
-    graphic->draw();
-    graphic->stop();
-
+    char c;
+    std::cin >> c;
+    graphic->close();
     destroy(graphic);
     dlclose(handle);
-
     return 0;
 }

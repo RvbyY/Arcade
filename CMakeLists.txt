@@ -17,13 +17,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)    # .so files   →
 add_executable(arcade
     src/main.cpp
 )
-target_include_directories(arcade PUBLIC "include")
 
 # ─── Helper macro to declare a shared library ────────────────────────────────
 # Usage: add_arcade_lib(<target_name> <sources...>)
 macro(add_arcade_lib NAME)
     add_library(${NAME} SHARED ${ARGN})
-    target_include_directories(${NAME} PUBLIC "include")
     set_target_properties(${NAME} PROPERTIES
         PREFIX ""          # avoid "lib" prefix → arcade_ncurses.so not libarcade_ncurses.so
         SUFFIX ".so"       # force .so even on macOS
@@ -33,26 +31,44 @@ endmacro()
 # ─── Arcade lib ───────────────────────────────────────────────────────────────
 
 include(ExternalProject)
+set(LIBARCADE_SRC_DIR ${CMAKE_SOURCE_DIR}/lib/libarcade)
+set(LIBARCADE_MAKEFILE ${LIBARCADE_SRC_DIR}/Makefile)
+
+if (EXISTS "${LIBARCADE_MAKEFILE}")
+    set(LIBARCADE_BUILD_CMD ${CMAKE_MAKE_PROGRAM} no-repo)
+else()
+    set(LIBARCADE_BUILD_CMD "")
+endif()
+
+
 ExternalProject_Add(libarcade
     GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
     GIT_TAG main
-    SOURCE_DIR ${CMAKE_SOURCE_DIR}/lib/libarcade
+    SOURCE_DIR ${LIBARCADE_SRC_DIR}
+    UPDATE_COMMAND ""
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make no-repo
+    # BUILD_COMMAND ${LIBARCADE_BUILD_CMD}
+    BUILD_COMMAND ""
     INSTALL_COMMAND ""
     BUILD_IN_SOURCE 1
 )
 add_dependencies(arcade libarcade)
+
 target_include_directories(arcade PUBLIC lib/libarcade)
 
 # ─── Graphics libraries ───────────────────────────────────────────────────────
 add_arcade_lib(arcade_ncurses
     src/graphics/ncurses/Ncurses.cpp
+    src/graphics/KeySwitch.cpp
 )
+target_link_libraries(arcade_ncurses PRIVATE ncurses)
 
 add_arcade_lib(arcade_sdl2
     src/graphics/SDL2/SDL2.cpp
+    src/graphics/KeySwitch.cpp
 )
+target_link_libraries(arcade_sdl2 PRIVATE SDL2 SDL2_ttf)
+
 
 # ─── Game libraries ───────────────────────────────────────────────────────────
 
