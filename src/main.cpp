@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include <iostream>
 #include "../lib/libarcade/Arcade/display.hpp"
+#include "Arcade/utils/text.hpp"
 
 int main(int argc, char* argv[])
 {
@@ -9,12 +10,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::string libPath = argv[1];
-
     Arcade::Color color(255, 0, 0);
-    std::cout << "Color: " << (int)color.red << ", " << (int)color.green << ", " << (int)color.blue << std::endl;
 
-    void* handle = dlopen(libPath.c_str(), RTLD_NOW);
+    void* handle = dlopen(argv[1], RTLD_LAZY);
     if (!handle) {
         std::cerr << dlerror() << std::endl;
         return 1;
@@ -34,7 +32,11 @@ int main(int argc, char* argv[])
 
     Arcade::IDisplay* graphic = create();
     graphic->open();
+    graphic->draw(Arcade::Text{"lol"});
     graphic->display();
+
+    char c;
+    std::cin >> c;
     graphic->close();
     destroy(graphic);
     dlclose(handle);
