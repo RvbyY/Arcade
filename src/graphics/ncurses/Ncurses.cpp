@@ -3,6 +3,16 @@
 #include <ncurses.h>
 #include <utility>
 
+extern "C" {
+    Arcade::IDisplay* create() {
+        return new NcursesGraphic();
+    }
+
+    void destroy(Arcade::IDisplay* display) {
+        delete display;
+    }
+}
+
 void NcursesGraphic::open()
 {
     setIsWinOpen(true);

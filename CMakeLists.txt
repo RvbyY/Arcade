@@ -47,9 +47,11 @@ target_include_directories(arcade PUBLIC lib/libarcade)
 add_arcade_lib(arcade_ncurses
     src/graphics/ncurses/Ncurses.cpp
 )
+target_link_libraries(arcade_ncurses PRIVATE ncurses)
 
 add_arcade_lib(arcade_sdl2
     src/graphics/SDL2/SDL2.cpp
 )
+target_link_libraries(arcade_sdl2 PRIVATE SDL2 SDL2_ttf)
 
 # ─── Game libraries ───────────────────────────────────────────────────────────

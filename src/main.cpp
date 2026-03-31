@@ -1,14 +1,20 @@
 #include <dlfcn.h>
 #include <iostream>
-#include "../lib/libarcade/Arcade/game.hpp"
 #include "../lib/libarcade/Arcade/display.hpp"
 
-int main()
+int main(int argc, char* argv[])
 {
-        Arcade::Color color(255, 0, 0);
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <path_to_graphic_lib>" << std::endl;
+        return 1;
+    }
+
+    std::string libPath = argv[1];
+
+    Arcade::Color color(255, 0, 0);
     std::cout << "Color: " << (int)color.red << ", " << (int)color.green << ", " << (int)color.blue << std::endl;
 
-    void* handle = dlopen("./lib/arcade_ncurses.so", RTLD_NOW);
+    void* handle = dlopen(libPath.c_str(), RTLD_NOW);
     if (!handle) {
         std::cerr << dlerror() << std::endl;
         return 1;
@@ -22,17 +28,15 @@ int main()
 
     if (!create || !destroy) {
         std::cerr << "Symbol error\n";
+        dlclose(handle);
         return 1;
     }
 
     Arcade::IDisplay* graphic = create();
-
     graphic->open();
     graphic->display();
     graphic->close();
-
     destroy(graphic);
     dlclose(handle);
-
     return 0;
 }

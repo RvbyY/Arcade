@@ -2,6 +2,16 @@
 #include "../../../lib/libarcade/Arcade/utils/types.hpp"
 #include <SDL2/SDL.h>
 
+extern "C" {
+    Arcade::IDisplay* create() {
+        return new SDL2Graphic();
+    }
+
+    void destroy(Arcade::IDisplay* display) {
+        delete display;
+    }
+}
+
 void SDL2Graphic::open()
 {
     SDL_Init(SDL_INIT_VIDEO);
