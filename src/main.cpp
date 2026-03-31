@@ -17,12 +17,10 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(handle, Arcade::DISPLAY_ENTRYPOINT);
-    // destroy_t destroy = (destroy_t)dlsym(handle, "destroy");
+    auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(::dlsym(handle, Arcade::DISPLAY_ENTRYPOINT));
 
     if (!createDisplay) {
         std::cerr << "Not a game library.\n";
-        // std::cerr << "Symbol error\n";
         dlclose(handle);
         return 1;
     }
@@ -39,26 +37,5 @@ int main(int argc, char* argv[])
     graphic->close();
 
     delete graphic;
-
-
-    // create_t create = (create_t)dlsym(handle, "create");
-    // destroy_t destroy = (destroy_t)dlsym(handle, "destroy");
-
-    // if (!create || !destroy) {
-    //     std::cerr << "Symbol error\n";
-    //     dlclose(handle);
-    //     return 1;
-    // }
-
-    // Arcade::IDisplay* graphic = create();
-    // graphic->open();
-    // graphic->draw(Arcade::Text{"lol"});
-    // graphic->display();
-
-    // char c;
-    // std::cin >> c;
-    // graphic->close();
-    // // destroy(graphic);
-    // dlclose(handle);
     return 0;
 }

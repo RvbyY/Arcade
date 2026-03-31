@@ -4,13 +4,10 @@
 #include <utility>
 
 extern "C" {
-    Arcade::IDisplay* create() {
+    Arcade::IDisplay* get_display() {
         return new NcursesGraphic();
     }
 
-    void destroy(Arcade::IDisplay* display) {
-        delete display;
-    }
 }
 
 void NcursesGraphic::open()
@@ -115,7 +112,7 @@ std::pair<Arcade::Coordinate, Arcade::Coordinate> NcursesGraphic::size() const n
 
     getmaxyx(_window, y, x);
 
-    return {y, x};
+    return {x, y};
 }
 
 std::string_view NcursesGraphic::libraryName() const noexcept
