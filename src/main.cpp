@@ -15,7 +15,7 @@ int main(int ac, char **av)
         return 1;
     }
 
-    auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(handle, "get_display");
+    auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(handle, Arcade::DISPLAY_ENTRYPOINT);
     // destroy_t destroy = (destroy_t)dlsym(handle, "destroy");
 
     if (!createDisplay) {
