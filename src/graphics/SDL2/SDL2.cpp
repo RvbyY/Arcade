@@ -84,7 +84,19 @@ std::optional<Arcade::Event> SDL2Graphic::pollEvent()
 {
     SDL_Event event;
 
-    return KeySwitch(event.key.keysym.sym);
+    if (SDL_PollEvent(&event) == 0)
+        return {};
+
+    if (event.type == SDL_QUIT)
+        return Arcade::Event::ARC_CLOSE;
+
+    if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+        return Arcade::Event::ARC_RESIZE;
+
+    if (event.type == SDL_KEYDOWN)
+        return KeySwitch(event.key.keysym.sym);
+
+    return {};
 }
 
 std::pair<Arcade::Coordinate, Arcade::Coordinate> SDL2Graphic::mousePosition() const
