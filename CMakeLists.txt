@@ -55,12 +55,13 @@ ExternalProject_Add(libarcade
 add_dependencies(arcade libarcade)
 
 target_include_directories(arcade PUBLIC lib/libarcade)
+target_link_libraries(arcade PUBLIC ncurses)
 
 # ─── Graphics libraries ───────────────────────────────────────────────────────
 add_arcade_lib(arcade_ncurses
     src/graphics/ncurses/Ncurses.cpp
 )
-target_link_libraries(arcade_ncurses PRIVATE ncurses)
+target_link_libraries(arcade_ncurses PRIVATE -lncurses)
 
 add_arcade_lib(arcade_sdl2
     src/graphics/SDL2/SDL2.cpp
