@@ -1,3 +1,4 @@
+#include "../../include/menu/menu.hpp"
 #include <dlfcn.h>
 #include <iostream>
 #include "Arcade/game.hpp"
@@ -13,9 +14,9 @@ int EntryArgsCheck(int argc, char **argv)
     return 0;
 }
 
-void *HandleDlOpen(char **argv, void *handle)
+void *HandleDlOpen(char **argv)
 {
-    handle = dlopen(argv[1], RTLD_NOW);
+    void* handle = dlopen(argv[1], RTLD_NOW);
     if (!handle) {
         std::cerr << dlerror() << std::endl;
         return nullptr;
@@ -25,29 +26,94 @@ void *HandleDlOpen(char **argv, void *handle)
 
 int ProgrammEntrypoint(int argc, char **argv)
 {
-    EntryArgsCheck(argc, argv);
-    Arcade::Color color(255, 0, 0);
+    const int status = EntryArgsCheck(argc, argv);
+    if (status != 0) {
+        return status;
+    }
 
-    void *handle = HandleDlOpen(argv, handle);
+    void *handle = HandleDlOpen(argv);
+    if (!handle) {
+        return 1;
+    }
 
     auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(::dlsym(handle, Arcade::DISPLAY_ENTRYPOINT));
-
     if (!createDisplay) {
-        std::cerr << "Not a game library.\n";
+        std::cerr << "Not a display library.\n";
         dlclose(handle);
         return 1;
     }
 
     Arcade::IDisplay* graphic = createDisplay();
+    if (!graphic) {
+        std::cerr << "Failed to instantiate display.\n";
+        dlclose(handle);
+        return 1;
+    }
 
     graphic->open();
-    graphic->draw(Arcade::Text{"hihi"});
-    graphic->display();
 
-    char c;
-    std::cin >> c;
+    std::size_t selectedButton = 0;
+    const Arcade::Color selectedColor(255, 255, 0);
+    const Arcade::Color normalColor(255, 255, 255);
+
+    while (graphic->isOpen()) {
+        graphic->clear();
+
+        graphic->draw(Arcade::Text{"[ Play ]", 10, 5, selectedButton == 0 ? selectedColor : normalColor});
+        graphic->draw(Arcade::Text{"[ Exit ]", 10, 7, selectedButton == 1 ? selectedColor : normalColor});
+        graphic->draw(Arcade::Text{">", 8, selectedButton == 0 ? 5 : 7, selectedColor});
+
+        graphic->display();
+
+        const auto event = graphic->pollEvent();
+        if (!event.has_value()) {
+            continue;
+        }
+
+        switch (*event) {
+            case Arcade::Event::ARC_ARROW_UP:
+            case Arcade::Event::ARC_ARROW_LEFT:
+                selectedButton = selectedButton == 0 ? 1 : 0;
+                break;
+
+            case Arcade::Event::ARC_ARROW_DOWN:
+            case Arcade::Event::ARC_ARROW_RIGHT:
+                selectedButton = selectedButton == 0 ? 1 : 0;
+                break;
+
+            case Arcade::Event::ARC_KEY_RETURN:
+            case Arcade::Event::ARC_KEY_SPACE:
+                if (selectedButton == 1) {
+                    graphic->close();
+                    delete graphic;
+                    dlclose(handle);
+                    return 0;
+                }
+                break;
+
+            case Arcade::Event::ARC_KEY_ESC:
+            case Arcade::Event::ARC_CLOSE:
+                graphic->close();
+                delete graphic;
+                dlclose(handle);
+                return 0;
+
+            default:
+                break;
+        }
+    }
+
     graphic->close();
-
     delete graphic;
+    dlclose(handle);
     return 0;
 }
+
+int main(int argc, char** argv)
+{
+    if (ProgrammEntrypoint(argc, argv) == 1) {
+        return 1;
+    }
+    else return 0;
+}
+

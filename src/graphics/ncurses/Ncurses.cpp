@@ -34,6 +34,7 @@ void NcursesGraphic::open()
 void NcursesGraphic::close() noexcept
 {
     setIsWinOpen(false);
+    curs_set(1);
     endwin();
 }
 
@@ -43,7 +44,7 @@ bool NcursesGraphic::isOpen() const noexcept
 }
 void NcursesGraphic::clear()
 {
-    clear();
+    ::clear();
 }
 
 void NcursesGraphic::display()
