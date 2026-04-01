@@ -3,6 +3,5 @@ arcade
 build
 *.so
 .co*
-lib
 .vscode
 .cache

@@ -15,7 +15,7 @@
  *                                                                                      *
  * ------------------------------------------------------------------------------------ */
 
-#include "grid.hpp"
+#include "../../include/tools/grid.hpp"
 
 template <typename T>
 int tools::grid<T>::index(Vec2 pos) const
