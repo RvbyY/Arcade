@@ -1,4 +1,5 @@
 #include "../../../include/graphics/Ncurses/Ncurses.hpp"
+#include "../../../lib/libarcade/Arcade/utils/colors.hpp"
 #include "../../../lib/libarcade/Arcade/utils/types.hpp"
 #include <ncurses.h>
 #include <utility>
@@ -13,22 +14,28 @@ extern "C" {
 void NcursesGraphic::open()
 {
     setIsWinOpen(true);
-    _window = initscr();
+    _window = ::initscr();
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
     curs_set(0);
 
-    if (has_colors()) {
-        start_color();
-        init_pair(1, COLOR_WHITE,   COLOR_BLACK);
-        init_pair(2, COLOR_RED,     COLOR_BLACK);
-        init_pair(3, COLOR_GREEN,   COLOR_BLACK);
-        init_pair(4, COLOR_YELLOW,  COLOR_BLACK);
-        init_pair(5, COLOR_BLUE,    COLOR_BLACK);
-        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
-        init_pair(7, COLOR_CYAN,    COLOR_BLACK);
-    }
+    ::start_color();
+    ::use_default_colors();
+
+    init_pair(COLOR_BLACK,   COLOR_BLACK,   COLOR_BLACK);
+    init_pair(COLOR_RED,     COLOR_RED,     COLOR_BLACK);
+    init_pair(COLOR_GREEN,   COLOR_GREEN,   COLOR_BLACK);
+    init_pair(COLOR_BLUE,    COLOR_BLUE,    COLOR_BLACK);
+    init_pair(COLOR_MAGENTA, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(COLOR_YELLOW,  COLOR_YELLOW,  COLOR_BLACK);
+    init_pair(COLOR_CYAN,    COLOR_CYAN,    COLOR_BLACK);
+    init_pair(COLOR_WHITE,   COLOR_WHITE,   COLOR_BLACK);
+
+    ::bkgd(COLOR_PAIR(COLOR_BLACK));
+    ::cbreak();
+    ::noecho();
+    ::keypad(stdscr, TRUE);
 }
 
 void NcursesGraphic::close() noexcept
@@ -44,12 +51,30 @@ bool NcursesGraphic::isOpen() const noexcept
 }
 void NcursesGraphic::clear()
 {
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
     ::clear();
 }
 
 void NcursesGraphic::display()
 {
-    refresh();
+    ::refresh();
+}
+
+static short ColorToNcurses(const Arcade::Color& color)
+{
+    Arcade::Color simple = color.simple();
+
+    switch (simple) {
+        case Arcade::BLACK:  return COLOR_BLACK;
+        case Arcade::RED:    return COLOR_RED;
+        case Arcade::GREEN:  return COLOR_GREEN;
+        case Arcade::BLUE:   return COLOR_BLUE;
+        case Arcade::PURPLE: return COLOR_MAGENTA;
+        case Arcade::YELLOW: return COLOR_YELLOW;
+        case Arcade::CYAN:   return COLOR_CYAN;
+        case Arcade::WHITE:  return COLOR_WHITE;
+        default:             return COLOR_WHITE;
+    }
 }
 
 void NcursesGraphic::draw(const Arcade::Shapes::Point& point)
@@ -85,13 +110,10 @@ void NcursesGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 
 void NcursesGraphic::draw(const Arcade::Text& text)
 {
-    int maxY, maxX;
-    getmaxyx(stdscr, maxY, maxX);
-    if (text.x >= maxX || text.y >= maxY || text.x < 0 || text.y < 0)
-        return;
-    attron(COLOR_PAIR(text.color));
-    mvprintw(text.y, text.x, "%s", text.content.c_str());
-    attroff(COLOR_PAIR(text.color));
+    short ncursesColor = ColorToNcurses(text.color);
+    ::attron(COLOR_PAIR(ncursesColor));
+    ::mvprintw(text.y, text.x, "%s", text.content.c_str());
+    ::attroff(COLOR_PAIR(ncursesColor));
 }
 
 std::optional<Arcade::Event> NcursesGraphic::pollEvent()
