@@ -16,6 +16,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)    # .so files   →
 # ─── Main executable ─────────────────────────────────────────────────────────
 add_executable(arcade
     src/main.cpp
+    src/menu/setupMenu.cpp
+    src/menu/Menu.cpp
+    src/menu/UsernameSelection.cpp
 )
 
 # ─── Helper macro to declare a shared library ────────────────────────────────
