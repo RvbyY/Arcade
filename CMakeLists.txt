@@ -73,5 +73,11 @@ add_arcade_lib(arcade_sdl2
 )
 target_link_libraries(arcade_sdl2 PRIVATE SDL2 SDL2_ttf)
 
+add_arcade_lib(arcade_sfml
+    src/graphics/SFML/SfmlGraphic.cpp
+    src/graphics/KeySwitch.cpp
+)
+target_link_libraries(arcade_sfml PRIVATE sfml-graphics sfml-window sfml-system)
+
 
 # ─── Game libraries ───────────────────────────────────────────────────────────
