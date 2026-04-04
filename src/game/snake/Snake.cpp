@@ -16,6 +16,7 @@ Snake::Snake()
     , _grid(MAP_WIDTH, MAP_HEIGHT, Tools::EMPTY)
     , nbApples(0)
     , _accumulator(0)
+    , _gameOver(false)
 {
 
 }
@@ -57,6 +58,7 @@ void Snake::eatApple()
 
 void Snake::init()
 {
+    _gameOver = false;
     nbApples = 0;
     _accumulator = 0ns;
     _grid.reset(Tools::EMPTY);
@@ -91,6 +93,8 @@ void Snake::handleEvent(Events::Event evt, IDisplay&)
 
 void Snake::update(std::chrono::nanoseconds dt, Player& player)
 {
+    if (_gameOver)
+        return;
     _accumulator+=dt;
     if (_accumulator < MOVE_DELAY)
         return;
@@ -100,6 +104,9 @@ void Snake::update(std::chrono::nanoseconds dt, Player& player)
     if (_grid.getPosition(nextCell) == Tools::APPLE) {
         eatApple();
         player.score += 1;
+    } else if (_grid.getPosition(nextCell) == Tools::BODY)
+    {
+        _gameOver = true;
     } else {
         _grid.setPosition(_snake.back(), Tools::EMPTY);
         _snake.pop_back();
@@ -128,6 +135,14 @@ void Snake::render(IDisplay& display)
         for (long y = 0; y < MAP_HEIGHT; ++y) {
             display.draw(Arcade::Shapes::Point(x, y, getCellColor(_grid.getPosition({x, y}))));
         }
+    }
+    if (_gameOver) {
+        Arcade::Text endDialog("GAME OVER BOZO SO BAD lol");
+
+        endDialog.x = (MAP_WIDTH - endDialog.content.size()) / 2;
+        endDialog.y = MAP_HEIGHT / 2;
+
+        display.draw(endDialog);
     }
 }
 

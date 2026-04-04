@@ -55,6 +55,7 @@ void NcursesGraphic::open()
     keypad(_window, TRUE);
     nodelay(_window, TRUE); // non-blocking input
     curs_set(0);
+    set_escdelay(5);
 
     if (has_colors()) {
         start_color();

@@ -34,11 +34,11 @@ namespace Arcade {
 
         private:
             static constexpr Arcade::Color DARK_GREEN = 0x00aa00;
-            static constexpr int MAP_WIDTH = 30;
+            static constexpr int MAP_WIDTH = 60;
             static constexpr int MAP_HEIGHT = 30;
             static constexpr int TARGET_APPLES = 3;
             static constexpr size_t APPLE_ATTEMPTS_MAX = 100;
-            static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(50); // configurable constant
+            static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100); // configurable constant
 
             // helpers
             bool spawnApple();
