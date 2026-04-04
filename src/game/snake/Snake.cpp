@@ -141,7 +141,7 @@ void Snake::render(IDisplay& display)
 {
     for (long x = 0; x < MAP_WIDTH; ++x) {
         for (long y = 0; y < MAP_HEIGHT; ++y) {
-            display.draw(Arcade::Shapes::Point(x, y, getCellColor(_grid.getPosition({x, y}))));
+            display.draw(Arcade::Shapes::Point(x + 1, y + 1, getCellColor(_grid.getPosition({x, y}))));
         }
     }
     if (_gameOver) {
@@ -152,6 +152,12 @@ void Snake::render(IDisplay& display)
 
         display.draw(endDialog);
     }
+
+    display.draw(Arcade::Shapes::Rectangle(0, 0, MAP_WIDTH + 2, 0, Arcade::Colors::WHITE));
+    display.draw(Arcade::Shapes::Rectangle(0, 0, 0, MAP_HEIGHT + 2, Arcade::Colors::WHITE));
+    display.draw(Arcade::Shapes::Rectangle(0, MAP_HEIGHT + 1, MAP_WIDTH + 2, 0, Arcade::Colors::WHITE));
+    display.draw(Arcade::Shapes::Rectangle(MAP_WIDTH + 1, 0, 0, MAP_HEIGHT + 2, Arcade::Colors::WHITE));
+
 }
 
 } // namespace Arcade

@@ -111,21 +111,22 @@ void NcursesGraphic::draw(const Arcade::Shapes::Point& point)
 
 void NcursesGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 {
-    int maxY, maxX;
-    getmaxyx(stdscr, maxY, maxX);
-    if (rect.x >= maxX || rect.y >= maxY || rect.x < 0 || rect.y < 0)
-        return;
+    // int maxY, maxX;
+    // getmaxyx(stdscr, maxY, maxX);
+    // if (rect.x >= maxX || rect.y >= maxY || rect.x < 0 || rect.y < 0)
+    //     return;
     attron(COLOR_PAIR(toPairBG(rect.color)));
 
-    for (int y = rect.y; y < rect.y + rect.height; y++) {
-        for (int x = rect.x; x < rect.x + rect.width; x++) {
-            bool isBorder = (y == rect.y || y == rect.y + rect.height - 1 ||
-                             x == rect.x || x == rect.x + rect.width - 1);
-            mvaddch(y, x, isBorder ? '#' : ' ');
+    for (int y = rect.y; y < rect.y + rect.height + (rect.height == 0); y++) {
+        for (int x = rect.x; x < rect.x + rect.width + (rect.width == 0); x++) {
+            // bool isBorder = (y == rect.y || y == rect.y + rect.height - 1 ||
+            //                  x == rect.x || x == rect.x + rect.width - 1);
+            // mvaddch(y, x, isBorder ? '#' : ' ');
+            mvaddch(y, x, ' ');
         }
     }
 
-    attroff(COLOR_PAIR(toPairFG(rect.color)));
+    attroff(COLOR_PAIR(toPairBG(rect.color)));
 }
 
 void NcursesGraphic::draw(const Arcade::Text& text)
