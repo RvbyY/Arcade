@@ -33,14 +33,15 @@ namespace Arcade {
             std::string_view gameTitle() const noexcept override { return "Snake - BAM"; }
 
         private:
-            static constexpr int MAP_WIDTH = 20;
-            static constexpr int MAP_HEIGHT = 20;
+            static constexpr int MAP_WIDTH = 30;
+            static constexpr int MAP_HEIGHT = 30;
             static constexpr int TARGET_APPLES = 3;
             static constexpr size_t APPLE_ATTEMPTS_MAX = 100;
-            static constexpr std::chrono::duration<double> MOVE_DELAY { 6.0 }; // configurable constant
+            static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(50); // configurable constant
 
             // helpers
             bool spawnApple();
+            void eatApple();
             std::optional<Tools::Vec2> getRandomEmptyCoord();
             Arcade::Color getCellColor(Tools::CellType type);
 
@@ -49,7 +50,7 @@ namespace Arcade {
             Tools::Grid<Tools::CellType> _grid;
             std::mt19937 _rng;
             std::deque<Tools::Vec2> _snake;               // front = head
-            Tools::Direction _dir;
+            Tools::Vec2 _dir;
             std::chrono::nanoseconds _accumulator;
             bool _gameOver;
     };

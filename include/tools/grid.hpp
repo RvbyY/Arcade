@@ -23,13 +23,6 @@
 
 namespace Tools
 {
-    enum Direction {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    };
-
     enum CellType {
         WALL,
         EMPTY,
@@ -69,6 +62,12 @@ namespace Tools
         }
     };
 
+    namespace Direction {
+        inline constexpr Vec2 UP = {0, -1};
+        inline constexpr Vec2 DOWN = {0, 1};
+        inline constexpr Vec2 LEFT = {-1, 0};
+        inline constexpr Vec2 RIGHT = {1, 0};
+    }
     struct Vec2Hash {
         std::size_t operator()(const Vec2& v) const {
             return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 16);

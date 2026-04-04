@@ -37,13 +37,22 @@ std::optional<Tools::Vec2> Snake::getRandomEmptyCoord()
 
 bool Snake::spawnApple()
 {
+    if (nbApples >= TARGET_APPLES)
+        return false;
     auto appleCoords = getRandomEmptyCoord();
 
-    if (!appleCoords || nbApples >= TARGET_APPLES)
+    if (!appleCoords)
         return false;
     _grid.setPosition(*appleCoords, Tools::APPLE);
     nbApples++;
     return true;
+}
+
+void Snake::eatApple()
+{
+    nbApples--;
+    // taille du serpent augmente, que faire ?
+    spawnApple();
 }
 
 void Snake::init()
@@ -51,6 +60,13 @@ void Snake::init()
     nbApples = 0;
     _accumulator = 0ns;
     _grid.reset(Tools::EMPTY);
+    for (int i = 0; i < 3; i++) {
+        Tools::Vec2 coords = {MAP_WIDTH / 2 - i, MAP_HEIGHT / 2};
+        _snake.push_back(coords);
+        _grid.setPosition(coords, Tools::BODY);
+    }
+    _grid.setPosition({MAP_WIDTH / 2, MAP_HEIGHT / 2}, Tools::HEAD);
+    _dir = Tools::Direction::RIGHT;
 }
 
 void Snake::destroy()
@@ -66,6 +82,22 @@ void Snake::handleEvent(Events::Event evt, IDisplay&)
 void Snake::update(std::chrono::nanoseconds dt, Player& player)
 {
     _accumulator+=dt;
+    if (_accumulator < MOVE_DELAY)
+        return;
+    _accumulator -= MOVE_DELAY;
+
+    auto nextCell = _grid.wrap(_snake.front() + _dir);
+    if (_grid.getPosition(nextCell) == Tools::APPLE) {
+        eatApple();
+    } else {
+        _grid.setPosition(_snake.back(), Tools::EMPTY);
+        _snake.pop_back();
+    }
+
+    _grid.setPosition(_snake.front(), Tools::BODY);
+    _snake.push_front(nextCell);
+    _grid.setPosition(_snake.front(), Tools::HEAD);
+    spawnApple();
 }
 
 Arcade::Color Snake::getCellColor(Tools::CellType type)
@@ -81,11 +113,8 @@ Arcade::Color Snake::getCellColor(Tools::CellType type)
 
 void Snake::render(IDisplay& display)
 {
-    for (int i = 0; i < 3; i++)
-        spawnApple();
     for (long x = 0; x < MAP_WIDTH; ++x) {
         for (long y = 0; y < MAP_HEIGHT; ++y) {
-
             display.draw(Arcade::Shapes::Point(x, y, getCellColor(_grid.getPosition({x, y}))));
         }
     }

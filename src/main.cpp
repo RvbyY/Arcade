@@ -7,6 +7,8 @@
 #include "Arcade/utils.hpp"
 #include "tools/grid.hpp"
 
+using std::chrono_literals::operator ""ns;
+
 int main(int argc, char* argv[])
 {
     const char* displayPath = argc >= 2 ? argv[1] : "";
@@ -65,7 +67,7 @@ int main(int argc, char* argv[])
         }
 
         auto now = std::chrono::steady_clock::now();
-        auto dt = std::chrono::duration_cast<std::chrono::nanoseconds>(now - last);
+        auto dt = now - last;
         last = now;
 
         game->update(dt, player);
@@ -76,8 +78,8 @@ int main(int argc, char* argv[])
 
         auto frameEnd = std::chrono::steady_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(frameEnd - now);
-        if (frameDuration < FRAME_TIME)
-            std::this_thread::sleep_for(FRAME_TIME - frameDuration);
+        auto sleepTime = std::max(0ns, FRAME_TIME - frameDuration);
+        std::this_thread::sleep_for(sleepTime);
     }
 
     game->destroy();
