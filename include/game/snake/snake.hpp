@@ -33,6 +33,7 @@ namespace Arcade {
             std::string_view gameTitle() const noexcept override { return "Snake - BAM"; }
 
         private:
+            static constexpr Arcade::Color DARK_GREEN = 0x00aa00;
             static constexpr int MAP_WIDTH = 30;
             static constexpr int MAP_HEIGHT = 30;
             static constexpr int TARGET_APPLES = 3;

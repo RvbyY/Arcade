@@ -76,7 +76,17 @@ void Snake::destroy()
 
 void Snake::handleEvent(Events::Event evt, IDisplay&)
 {
-   // TODO
+    namespace Dir = Tools::Direction;
+    switch (evt)
+    {
+    case ARC_ARROW_UP: return _dir = _dir != Dir::DOWN ? Dir::UP : _dir;
+    case ARC_ARROW_DOWN: return _dir = _dir != Dir::UP ? Dir::DOWN : _dir;
+    case ARC_ARROW_LEFT: return _dir = _dir != Dir::RIGHT ? Dir::LEFT : _dir;
+    case ARC_ARROW_RIGHT: return _dir = _dir != Dir::LEFT ? Dir::RIGHT : _dir;
+
+    default:
+        return;
+    }
 }
 
 void Snake::update(std::chrono::nanoseconds dt, Player& player)
@@ -89,6 +99,7 @@ void Snake::update(std::chrono::nanoseconds dt, Player& player)
     auto nextCell = _grid.wrap(_snake.front() + _dir);
     if (_grid.getPosition(nextCell) == Tools::APPLE) {
         eatApple();
+        player.score += 1;
     } else {
         _grid.setPosition(_snake.back(), Tools::EMPTY);
         _snake.pop_back();
@@ -105,8 +116,8 @@ Arcade::Color Snake::getCellColor(Tools::CellType type)
     switch (type)
     {
         case Tools::APPLE: return Arcade::Colors::RED;
-        case Tools::BODY: return Arcade::Colors::GREEN;
-        case Tools::HEAD: return 0x00aa00;
+        case Tools::BODY: return Arcade::Colors::CYAN;
+        case Tools::HEAD: return Arcade::Colors::GREEN;
         default: return Arcade::Colors::BLACK;
     }
 }

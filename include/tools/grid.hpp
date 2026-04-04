@@ -51,6 +51,12 @@ namespace Tools
             };
         }
 
+        void operator=(const Vec2& other)
+        {
+            x = other.x;
+            y = other.y;
+        }
+
         bool operator==(const Vec2& other) const
         {
             return x == other.x && y == other.y;
