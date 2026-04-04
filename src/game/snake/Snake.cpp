@@ -39,7 +39,7 @@ bool Snake::spawnApple()
 {
     auto appleCoords = getRandomEmptyCoord();
 
-    if (!appleCoords)
+    if (!appleCoords || nbApples >= TARGET_APPLES)
         return false;
     _grid.setPosition(*appleCoords, Tools::APPLE);
     nbApples++;
@@ -68,9 +68,27 @@ void Snake::update(std::chrono::nanoseconds dt, Player& player)
     _accumulator+=dt;
 }
 
+Arcade::Color Snake::getCellColor(Tools::CellType type)
+{
+    switch (type)
+    {
+        case Tools::APPLE: return Arcade::Colors::RED;
+        case Tools::BODY: return Arcade::Colors::GREEN;
+        case Tools::HEAD: return 0x00aa00;
+        default: return Arcade::Colors::BLACK;
+    }
+}
+
 void Snake::render(IDisplay& display)
 {
-    display.draw(Arcade::Shapes::Point(1, 1, Arcade::Colors::RED));
+    for (int i = 0; i < 3; i++)
+        spawnApple();
+    for (long x = 0; x < MAP_WIDTH; ++x) {
+        for (long y = 0; y < MAP_HEIGHT; ++y) {
+
+            display.draw(Arcade::Shapes::Point(x, y, getCellColor(_grid.getPosition({x, y}))));
+        }
+    }
 }
 
 } // namespace Arcade

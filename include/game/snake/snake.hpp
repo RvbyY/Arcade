@@ -42,6 +42,7 @@ namespace Arcade {
             // helpers
             bool spawnApple();
             std::optional<Tools::Vec2> getRandomEmptyCoord();
+            Arcade::Color getCellColor(Tools::CellType type);
 
             // state
             size_t nbApples;
