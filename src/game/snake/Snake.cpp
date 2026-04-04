@@ -52,7 +52,6 @@ bool Snake::spawnApple()
 void Snake::eatApple()
 {
     nbApples--;
-    // taille du serpent augmente, que faire ?
     spawnApple();
 }
 
@@ -73,7 +72,16 @@ void Snake::init()
 
 void Snake::destroy()
 {
-    // TODO
+    _grid.cells.clear();
+    _grid.cells.shrink_to_fit();
+    _snake.clear();
+    _snake.shrink_to_fit();
+}
+
+void Snake::restart()
+{
+    destroy();
+    init();
 }
 
 void Snake::handleEvent(Events::Event evt, IDisplay&)
@@ -85,7 +93,7 @@ void Snake::handleEvent(Events::Event evt, IDisplay&)
     case ARC_ARROW_DOWN: return _dir = _dir != Dir::UP ? Dir::DOWN : _dir;
     case ARC_ARROW_LEFT: return _dir = _dir != Dir::RIGHT ? Dir::LEFT : _dir;
     case ARC_ARROW_RIGHT: return _dir = _dir != Dir::LEFT ? Dir::RIGHT : _dir;
-
+    case ARC_KEY_R : return restart();
     default:
         return;
     }
@@ -137,7 +145,7 @@ void Snake::render(IDisplay& display)
         }
     }
     if (_gameOver) {
-        Arcade::Text endDialog("GAME OVER BOZO SO BAD lol");
+        Arcade::Text endDialog("GAME OVER ! PRESS \'R\' to restart the game!");
 
         endDialog.x = (MAP_WIDTH - endDialog.content.size()) / 2;
         endDialog.y = MAP_HEIGHT / 2;

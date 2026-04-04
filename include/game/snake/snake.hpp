@@ -29,6 +29,7 @@ namespace Arcade {
             void handleEvent(Events::Event evt, IDisplay& display) override;
             void update(std::chrono::nanoseconds dt, Player& player) override;
             void render(IDisplay& display) override;
+            void restart();
 
             std::string_view gameTitle() const noexcept override { return "Snake - BAM"; }
 
