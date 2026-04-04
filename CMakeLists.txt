@@ -17,6 +17,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)    # .so files   →
 add_executable(arcade
     src/main.cpp
 )
+target_include_directories(arcade PRIVATE include lib/libarcade)
 
 # ─── Helper macro to declare a shared library ────────────────────────────────
 # Usage: add_arcade_lib(<target_name> <sources...>)
@@ -69,6 +70,13 @@ add_arcade_lib(arcade_sdl2
     src/graphics/KeySwitch.cpp
 )
 target_link_libraries(arcade_sdl2 PRIVATE SDL2 SDL2_ttf)
+
+
+# ─── Game libraries ───────────────────────────────────────────────────────────
+add_arcade_lib(arcade_snake
+    src/game/snake/Snake.cpp
+)
+target_include_directories(arcade_snake PRIVATE include lib/libarcade)
 
 
 # ─── Game libraries ───────────────────────────────────────────────────────────
