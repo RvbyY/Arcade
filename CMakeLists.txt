@@ -16,6 +16,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)    # .so files   →
 # ─── Main executable ─────────────────────────────────────────────────────────
 add_executable(arcade
     src/main.cpp
+    src/core/core.cpp
+    src/core/game_loop.cpp
+    src/core/load_libraries.cpp
 )
 target_include_directories(arcade PRIVATE include lib/libarcade)
 
