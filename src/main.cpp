@@ -1,8 +1,9 @@
 #include <exception>
 #include <iostream>
 #include "core/core.hpp"
+#include "../../include/menu/menu.hpp"
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
     try {
         return core(argc, argv);

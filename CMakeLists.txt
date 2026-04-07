@@ -19,6 +19,9 @@ add_executable(arcade
     src/core/core.cpp
     src/core/game_loop.cpp
     src/core/load_libraries.cpp
+    src/menu/setupMenu.cpp
+    src/menu/Menu.cpp
+    src/menu/UsernameSelection.cpp
 )
 target_include_directories(arcade PRIVATE include lib/libarcade)
 
@@ -64,15 +67,21 @@ target_link_libraries(arcade PUBLIC ncurses)
 # ─── Graphics libraries ───────────────────────────────────────────────────────
 add_arcade_lib(arcade_ncurses
     src/graphics/ncurses/Ncurses.cpp
-    src/graphics/KeySwitch.cpp
+    src/graphics/ncurses/NcursesKeySwitch.cpp
 )
 target_link_libraries(arcade_ncurses PRIVATE -lncurses)
 
 add_arcade_lib(arcade_sdl2
     src/graphics/SDL2/SDL2.cpp
-    src/graphics/KeySwitch.cpp
+    src/graphics/SDL2/SDL2KeySwitch.cpp
 )
 target_link_libraries(arcade_sdl2 PRIVATE SDL2 SDL2_ttf)
+
+add_arcade_lib(arcade_sfml
+    src/graphics/SFML/SfmlGraphic.cpp
+    src/graphics/SFML/SfmlKeySwitch.cpp
+)
+target_link_libraries(arcade_sfml PRIVATE sfml-graphics sfml-window sfml-system)
 
 
 # ─── Game libraries ───────────────────────────────────────────────────────────
