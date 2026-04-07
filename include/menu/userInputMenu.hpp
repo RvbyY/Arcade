@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstddef>
 #include <dlfcn.h>
 #include "Arcade/game.hpp"
@@ -9,16 +11,17 @@ int ProgrammEntrypoint(int, char**);
 std::string UsernameScreen(Arcade::IDisplay* graphic);
 
 
-#include "../lib/libarcade/Arcade/game.hpp"
+#include "Arcade/game.hpp"
 
+class Core;
 namespace Arcade {
     class IDisplay;
     struct Player;
 
-    class Menu : public IGame {
+    class UserInputMenu : public IGame {
         public:
-            Menu();
-            ~Menu() noexcept override = default;
+            UserInputMenu(Core& core);
+            ~UserInputMenu() noexcept override = default;
 
             void init() override;
             void destroy() override;
@@ -30,7 +33,7 @@ namespace Arcade {
             std::string_view gameTitle() const noexcept override { return "Menu - BAM"; }
 
         private:
-        
+        Core& _core;
     };
 }
 

@@ -1,4 +1,41 @@
-#include "../../include/menu/menu.hpp"
+#include "../../include/menu/userInputMenu.hpp"
+#include "../../include/core/core.hpp"
+
+Arcade::UserInputMenu::UserInputMenu(Core& core)
+    : _core(core)
+{
+}
+
+
+void Arcade::UserInputMenu::init()
+{
+
+}
+
+void Arcade::UserInputMenu::destroy()
+{
+
+}
+
+void Arcade::UserInputMenu::handleEvent(Events::Event evt, IDisplay& display)
+{
+
+}
+
+void Arcade::UserInputMenu::update(std::chrono::nanoseconds dt, Player& player)
+{
+
+}
+
+void Arcade::UserInputMenu::render(IDisplay& display)
+{
+
+}
+
+void Arcade::UserInputMenu::restart()
+{
+
+}
 
 void MenuLoop(std::size_t selectedButton, Arcade::IDisplay* graphic, void *handle)
 {

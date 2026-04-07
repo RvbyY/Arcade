@@ -1,4 +1,4 @@
-#include "../../include/menu/menu.hpp"
+#include "../../include/menu/userInputMenu.hpp"
 
 char EventToChar(Arcade::Event event)
 {

@@ -11,6 +11,7 @@
 #include "Arcade/display.hpp"
 #include "Arcade/game.hpp"
 #include "Arcade/utils.hpp"
+#include "../menu/userInputMenu.hpp"
 
 class Core {
     public:
@@ -19,6 +20,12 @@ class Core {
     int run();
 
     private:
+    int game_loop();
+    static void closeLibrary(void* handle);
+    static SharedLibrary loadLibraryOrThrow(const char* path);
+    static Arcade::DisplayEntryPointFnc loadDisplayEntryPointOrThrow(void* displayHandle);
+    static Arcade::GameEntryPointFnc loadGameEntryPointOrThrow(void* gameHandle);
+
     std::span<char *> _args;
     Arcade::IDisplay* _currDisplay = nullptr;
     Arcade::IGame* _currGame = nullptr;
@@ -31,14 +38,7 @@ class Core {
     std::vector<std::unique_ptr<Arcade::IGame>> _games;
     std::vector<std::unique_ptr<Arcade::Player>> _players;
 
-    int game_loop();
-    static void closeLibrary(void* handle);
-    static SharedLibrary loadLibraryOrThrow(const char* path);
-    static Arcade::DisplayEntryPointFnc loadDisplayEntryPointOrThrow(void* displayHandle);
-    static Arcade::GameEntryPointFnc loadGameEntryPointOrThrow(void* gameHandle);
-
-
-
+    Arcade::UserInputMenu _menu;
 
 
 };

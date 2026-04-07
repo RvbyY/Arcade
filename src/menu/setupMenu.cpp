@@ -1,4 +1,4 @@
-#include "../../include/menu/menu.hpp"
+#include "../../include/menu/userInputMenu.hpp"
 #include <iostream>
 
 int EntryArgsCheck(int argc, char **argv)
@@ -57,4 +57,3 @@ int ProgrammEntrypoint(int argc, char **argv)
     dlclose(handle);
     return 0;
 }
-

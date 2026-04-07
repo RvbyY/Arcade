@@ -12,6 +12,7 @@
 
 Core::Core(int argc, char** argv)
     : _args(argv, argc)
+    , _menu(*this)
 {
 }
 
@@ -35,7 +36,7 @@ int Core::run()
     _players.push_back(std::make_unique<Arcade::Player>("nom"));
 
     _currDisplay = _displays[0].get();
-    _currGame = _games[0].get();
+    _currGame = &_menu;
     _currPlayer = _players[0].get();
 
     bool displayOpened = false;

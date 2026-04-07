@@ -1,7 +1,7 @@
 #include <exception>
 #include <iostream>
 #include "core/core.hpp"
-#include "../../include/menu/menu.hpp"
+#include "../../include/menu/userInputMenu.hpp"
 
 int main(int argc, char** argv)
 {

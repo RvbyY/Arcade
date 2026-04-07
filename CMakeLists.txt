@@ -20,7 +20,7 @@ add_executable(arcade
     src/core/game_loop.cpp
     src/core/load_libraries.cpp
     src/menu/setupMenu.cpp
-    src/menu/Menu.cpp
+    src/menu/UserInputMenu.cpp
     src/menu/UsernameSelection.cpp
 )
 target_include_directories(arcade PRIVATE include lib/libarcade)
