@@ -15,7 +15,7 @@ Core::Core(int argc, char** argv)
 {
 }
 
-void Core::run()
+int Core::run()
 {
     if (_args.size() < 2) {
         throw std::runtime_error("Usage: ./arcade <path_to_graphic_lib> [path_to_game_lib]");
@@ -24,11 +24,11 @@ void Core::run()
     const auto& displayPath = _args[1];
     const char* gamePath = _args.size() >= 3 ? _args[2] : "lib/arcade_snake.so"; // default to snake for testing - change to menu
 
-    SharedLibrary displayHandle = loadLibraryOrThrow(displayPath);
-    Arcade::DisplayEntryPointFnc createDisplay = loadDisplayEntryPointOrThrow(displayHandle.get());
+    _displayHandles.emplace_back(loadLibraryOrThrow(displayPath));
+    Arcade::DisplayEntryPointFnc createDisplay = loadDisplayEntryPointOrThrow(_displayHandles.back().get());
 
-    SharedLibrary gameHandle = loadLibraryOrThrow(gamePath);
-    Arcade::GameEntryPointFnc createGame = loadGameEntryPointOrThrow(gameHandle.get());
+    _gameHandles.emplace_back(loadLibraryOrThrow(gamePath));
+    Arcade::GameEntryPointFnc createGame = loadGameEntryPointOrThrow(_gameHandles.back().get());
 
     _displays.emplace_back(createDisplay());
     _games.emplace_back(createGame());
@@ -40,12 +40,13 @@ void Core::run()
 
     bool displayOpened = false;
     bool gameInitialized = false;
+    int status = 0;
     try {
         _currDisplay->open();
         displayOpened = true;
         _currGame->init();
         gameInitialized = true;
-        game_loop();
+        status = game_loop();
     } catch (...) {
         if (gameInitialized) {
             _currGame->destroy();
@@ -58,4 +59,5 @@ void Core::run()
 
     _currGame->destroy();
     _currDisplay->close();
+    return status;
 }

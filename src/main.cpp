@@ -6,12 +6,16 @@
 int main(int argc, char** argv)
 {
     Core core(argc, argv);
+
+    int status = 0;
     try {
-        core.run();
+        status = core.run();
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
+        return 1;
     } catch (...) {
         std::cerr << "Unknown error." << std::endl;
+        return 1;
     }
-    return 1;
+    return status;
 }

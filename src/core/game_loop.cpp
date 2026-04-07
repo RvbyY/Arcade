@@ -12,7 +12,7 @@
 
 using std::chrono_literals::operator ""ns;
 
-void Core::game_loop()
+int Core::game_loop()
 {
     auto last = std::chrono::steady_clock::now();
     constexpr std::chrono::nanoseconds FRAME_TIME{16'666'667}; // ~60 FPS cap
@@ -40,4 +40,5 @@ void Core::game_loop()
         auto sleepTime = std::max(0ns, FRAME_TIME - frameDuration);
         std::this_thread::sleep_for(sleepTime);
     }
+    return 0;
 }
