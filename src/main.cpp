@@ -5,8 +5,9 @@
 
 int main(int argc, char** argv)
 {
+    Core core(argc, argv);
     try {
-        return core(argc, argv);
+        core.run();
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
     } catch (...) {

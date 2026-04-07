@@ -12,28 +12,28 @@
 
 using std::chrono_literals::operator ""ns;
 
-void game_loop(Arcade::IDisplay& display, Arcade::IGame& game, Arcade::Player& player)
+void Core::game_loop()
 {
     auto last = std::chrono::steady_clock::now();
     constexpr std::chrono::nanoseconds FRAME_TIME{16'666'667}; // ~60 FPS cap
 
-    while (display.isOpen()) {
-        if (auto evt = display.pollEvent()) {
+    while (_currDisplay->isOpen()) {
+        if (auto evt = _currDisplay->pollEvent()) {
             if (*evt == Arcade::Events::ARC_KEY_ESC || *evt == Arcade::Events::ARC_CLOSE) {
                 break;
             }
-            game.handleEvent(*evt, display);
+            _currGame->handleEvent(*evt, *_currDisplay);
         }
 
         auto now = std::chrono::steady_clock::now();
         auto dt = now - last;
         last = now;
 
-        game.update(dt, player);
+        _currGame->update(dt, *_currPlayer);
 
-        display.clear();
-        game.render(display);
-        display.display();
+        _currDisplay->clear();
+        _currGame->render(*_currDisplay);
+        _currDisplay->display();
 
         auto frameEnd = std::chrono::steady_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(frameEnd - now);

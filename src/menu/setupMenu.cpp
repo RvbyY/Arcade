@@ -57,4 +57,4 @@ int ProgrammEntrypoint(int argc, char **argv)
     dlclose(handle);
     return 0;
 }
-    
+

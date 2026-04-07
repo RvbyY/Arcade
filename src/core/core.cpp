@@ -10,45 +10,52 @@
 #include <string>
 #include "core/core.hpp"
 
-int core(int argc, char* argv[])
+Core::Core(int argc, char** argv)
+    : _args(argv, argc)
 {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <path_to_graphic_lib> [path_to_game_lib]" << std::endl;
-        return 1;
+}
+
+void Core::run()
+{
+    if (_args.size() < 2) {
+        throw std::runtime_error("Usage: ./arcade <path_to_graphic_lib> [path_to_game_lib]");
     }
 
-    const char* displayPath = argv[1];
-    const char* gamePath = argc >= 3 ? argv[2] : "lib/arcade_snake.so"; // default to snake for testing
+    const auto& displayPath = _args[1];
+    const char* gamePath = _args.size() >= 3 ? _args[2] : "lib/arcade_snake.so"; // default to snake for testing - change to menu
 
-    SharedLibrary displayHandle = load_library_or_throw(displayPath);
-    Arcade::DisplayEntryPointFnc createDisplay = load_display_entrypoint_or_throw(displayHandle.get());
+    SharedLibrary displayHandle = loadLibraryOrThrow(displayPath);
+    Arcade::DisplayEntryPointFnc createDisplay = loadDisplayEntryPointOrThrow(displayHandle.get());
 
-    SharedLibrary gameHandle = load_library_or_throw(gamePath);
-    Arcade::GameEntryPointFnc createGame = load_game_entrypoint_or_throw(gameHandle.get());
+    SharedLibrary gameHandle = loadLibraryOrThrow(gamePath);
+    Arcade::GameEntryPointFnc createGame = loadGameEntryPointOrThrow(gameHandle.get());
 
-    std::unique_ptr<Arcade::IDisplay> display(createDisplay());
-    std::unique_ptr<Arcade::IGame> game(createGame());
-    Arcade::Player player(std::string("tester"));
+    _displays.emplace_back(createDisplay());
+    _games.emplace_back(createGame());
+    _players.push_back(std::make_unique<Arcade::Player>("nom"));
+
+    _currDisplay = _displays[0].get();
+    _currGame = _games[0].get();
+    _currPlayer = _players[0].get();
 
     bool displayOpened = false;
     bool gameInitialized = false;
     try {
-        display->open();
+        _currDisplay->open();
         displayOpened = true;
-        game->init();
+        _currGame->init();
         gameInitialized = true;
-        game_loop(*display, *game, player);
+        game_loop();
     } catch (...) {
         if (gameInitialized) {
-            game->destroy();
+            _currGame->destroy();
         }
         if (displayOpened) {
-            display->close();
+            _currDisplay->close();
         }
         throw;
     }
 
-    game->destroy();
-    display->close();
-    return 0;
+    _currGame->destroy();
+    _currDisplay->close();
 }

@@ -12,13 +12,30 @@
 #include "Arcade/game.hpp"
 #include "Arcade/utils.hpp"
 
-int core(int argc, char* argv[]);
-void game_loop(Arcade::IDisplay& display, Arcade::IGame& game, Arcade::Player& player);
+class Core {
+    public:
+    using SharedLibrary = std::unique_ptr<void, void(*)(void*)>;
+    Core(int argc, char** argv);
+    void run();
 
-void close_library(void* handle);
+    private:
+    std::span<char *> _args;
+    Arcade::IDisplay* _currDisplay;
+    Arcade::IGame* _currGame;
+    Arcade::Player* _currPlayer;
 
-using SharedLibrary = std::unique_ptr<void, void(*)(void*)>;
+    std::vector<std::unique_ptr<Arcade::IDisplay>> _displays;
+    std::vector<std::unique_ptr<Arcade::IGame>> _games;
+    std::vector<std::unique_ptr<Arcade::Player>> _players;
 
-SharedLibrary load_library_or_throw(const char* path);
-Arcade::DisplayEntryPointFnc load_display_entrypoint_or_throw(void* displayHandle);
-Arcade::GameEntryPointFnc load_game_entrypoint_or_throw(void* gameHandle);
+    void game_loop();
+    static void closeLibrary(void* handle);
+    static SharedLibrary loadLibraryOrThrow(const char* path);
+    static Arcade::DisplayEntryPointFnc loadDisplayEntryPointOrThrow(void* displayHandle);
+    static Arcade::GameEntryPointFnc loadGameEntryPointOrThrow(void* gameHandle);
+
+
+
+
+
+};

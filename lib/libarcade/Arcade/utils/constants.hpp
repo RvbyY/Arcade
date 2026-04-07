@@ -30,7 +30,7 @@ namespace Arcade {
          * (since addresses are not known at compile-time,
          * arrays have to be used instead).
          */
-        static constexpr const char GAME_ENTRYPOINT[] = "get_game";
-        static constexpr const char DISPLAY_ENTRYPOINT[] = "get_display";
+        inline constexpr const char GAME_ENTRYPOINT[] = "get_game";
+        inline constexpr const char DISPLAY_ENTRYPOINT[] = "get_display";
     }
 }
