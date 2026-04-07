@@ -8,9 +8,14 @@
 #pragma once
 
 #include <memory>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
 #include "Arcade/display.hpp"
 #include "Arcade/game.hpp"
 #include "Arcade/utils.hpp"
+#include "../menu/selectMenu.hpp"
 #include "../menu/userInputMenu.hpp"
 
 class Core {
@@ -19,8 +24,33 @@ class Core {
     Core(int argc, char** argv);
     int run();
 
+    void switchToUserInputMenu();
+    void switchToSelectMenu();
+    void switchToLoadedGame();
+    void cycleToNextGame();
+    bool selectDisplay(std::size_t index);
+    bool selectGame(std::size_t index) noexcept;
+
+    Arcade::Player& getCurrentPlayer() noexcept;
+    const Arcade::Player& getCurrentPlayer() const noexcept;
+
+    std::size_t displayCount() const noexcept;
+    std::size_t gameCount() const noexcept;
+
+    std::size_t selectedDisplayIndex() const noexcept;
+    std::size_t selectedGameIndex() const noexcept;
+
+    std::string_view displayName(std::size_t index) const noexcept;
+    std::string_view gameTitle(std::size_t index) const noexcept;
+
+    bool isLoadedGameActive() const noexcept;
+
     private:
     int game_loop();
+    void loadLibrariesFromDirectory(std::string_view directory);
+    void selectInitialLibraries(std::string_view preferredDisplayPath, std::string_view preferredGamePath);
+    void queueGameSwitch(Arcade::IGame* nextGame);
+    void applyPendingGameSwitch();
     static void closeLibrary(void* handle);
     static SharedLibrary loadLibraryOrThrow(const char* path);
     static Arcade::DisplayEntryPointFnc loadDisplayEntryPointOrThrow(void* displayHandle);
@@ -29,6 +59,7 @@ class Core {
     std::span<char *> _args;
     Arcade::IDisplay* _currDisplay = nullptr;
     Arcade::IGame* _currGame = nullptr;
+    Arcade::IGame* _pendingGame = nullptr;
     Arcade::Player* _currPlayer = nullptr;
 
     std::vector<SharedLibrary> _displayHandles;
@@ -37,8 +68,12 @@ class Core {
     std::vector<std::unique_ptr<Arcade::IDisplay>> _displays;
     std::vector<std::unique_ptr<Arcade::IGame>> _games;
     std::vector<std::unique_ptr<Arcade::Player>> _players;
+    std::vector<std::string> _displayPaths;
+    std::vector<std::string> _gamePaths;
 
-    Arcade::UserInputMenu _menu;
+    std::size_t _selectedDisplayIndex = 0;
+    std::size_t _selectedGameIndex = 0;
 
-
+    Arcade::UserInputMenu _userInputMenu;
+    Arcade::SelectMenu _selectMenu;
 };

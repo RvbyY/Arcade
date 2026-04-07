@@ -1,23 +1,28 @@
 #pragma once
 
+#include <cstddef>
 #include <optional>
-#include <string>
 #include "Arcade/game.hpp"
 #include "Arcade/display.hpp"
 #include "Arcade/utils.hpp"
 
-char EventToChar(Arcade::Event event);
-std::string UsernameScreen(Arcade::IDisplay* graphic);
+void MenuLoop(std::size_t selectedButton, Arcade::IDisplay* graphic, void *handle);
+int ProgrammEntrypoint(int, char**);
 
 class Core;
 namespace Arcade {
     class IDisplay;
     struct Player;
 
-    class UserInputMenu : public IGame {
+    class SelectMenu : public IGame {
         public:
-            UserInputMenu(Core& core);
-            ~UserInputMenu() noexcept override = default;
+            enum class SelectType {
+                Graphics,
+                Games
+            };
+
+            SelectMenu(Core& core);
+            ~SelectMenu() noexcept override = default;
 
             void init() override;
             void destroy() override;
@@ -26,10 +31,11 @@ namespace Arcade {
             void render(IDisplay& display) override;
             void restart();
 
-            std::string_view gameTitle() const noexcept override { return "User Input Menu - BAM"; }
+            std::string_view gameTitle() const noexcept override { return "Select Menu - BAM"; }
 
         private:
             Core& _core;
+            SelectType _selected = SelectType::Graphics;
             std::optional<Events::Event> _pendingEvent;
     };
 }

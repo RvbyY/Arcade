@@ -19,7 +19,7 @@ add_executable(arcade
     src/core/core.cpp
     src/core/game_loop.cpp
     src/core/load_libraries.cpp
-    src/menu/setupMenu.cpp
+    src/menu/SelectMenu.cpp
     src/menu/UserInputMenu.cpp
     src/menu/UsernameSelection.cpp
 )
