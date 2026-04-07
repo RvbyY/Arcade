@@ -63,7 +63,15 @@ int Core::game_loop()
 
     while (_currDisplay->isOpen()) {
         if (auto evt = _currDisplay->pollEvent()) {
-            if (*evt == Arcade::Events::ARC_KEY_ESC || *evt == Arcade::Events::ARC_CLOSE) {
+            if (*evt == Arcade::Events::ARC_CLOSE) {
+                break;
+            }
+            if (*evt == Arcade::Events::ARC_KEY_ESC) {
+                if (_currGame == &_selectMenu) {
+                    switchToUserInputMenu();
+                    applyPendingGameSwitch();
+                    continue;
+                }
                 break;
             }
             if (handleGlobalEvent(*this, *evt)) {

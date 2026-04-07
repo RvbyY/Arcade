@@ -30,6 +30,7 @@ class Core {
     void cycleToNextGame();
     bool selectDisplay(std::size_t index);
     bool selectGame(std::size_t index) noexcept;
+    bool confirmCurrentPlayerSelection();
 
     Arcade::Player& getCurrentPlayer() noexcept;
     const Arcade::Player& getCurrentPlayer() const noexcept;
@@ -49,6 +50,8 @@ class Core {
     int game_loop();
     void loadLibrariesFromDirectory(std::string_view directory);
     void selectInitialLibraries(std::string_view preferredDisplayPath, std::string_view preferredGamePath);
+    void startPlayerInput();
+    Arcade::Player* findPlayerByName(std::string_view name) const noexcept;
     void queueGameSwitch(Arcade::IGame* nextGame);
     void applyPendingGameSwitch();
     static void closeLibrary(void* handle);
@@ -70,6 +73,7 @@ class Core {
     std::vector<std::unique_ptr<Arcade::Player>> _players;
     std::vector<std::string> _displayPaths;
     std::vector<std::string> _gamePaths;
+    Arcade::Player _inputPlayer{""};
 
     std::size_t _selectedDisplayIndex = 0;
     std::size_t _selectedGameIndex = 0;

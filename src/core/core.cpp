@@ -36,11 +36,10 @@ int Core::run()
     }
     selectInitialLibraries(preferredDisplayPath, preferredGamePath);
 
-    _players.push_back(std::make_unique<Arcade::Player>("nom"));
+    startPlayerInput();
 
     _currDisplay = _displays[_selectedDisplayIndex].get();
     _currGame = &_userInputMenu;
-    _currPlayer = _players[0].get();
 
     bool displayOpened = false;
     bool gameInitialized = false;
@@ -68,6 +67,7 @@ int Core::run()
 
 void Core::switchToUserInputMenu()
 {
+    startPlayerInput();
     queueGameSwitch(&_userInputMenu);
 }
 
@@ -133,6 +133,23 @@ bool Core::selectGame(std::size_t index) noexcept
     return true;
 }
 
+bool Core::confirmCurrentPlayerSelection()
+{
+    if (_currPlayer == nullptr || _currPlayer->name.empty()) {
+        return false;
+    }
+
+    Arcade::Player* existingPlayer = findPlayerByName(_currPlayer->name);
+
+    if (existingPlayer != nullptr) {
+        _currPlayer = existingPlayer;
+    } else {
+        _players.push_back(std::make_unique<Arcade::Player>(_currPlayer->name));
+        _currPlayer = _players.back().get();
+    }
+    return true;
+}
+
 Arcade::Player& Core::getCurrentPlayer() noexcept
 {
     return *_currPlayer;
@@ -182,6 +199,23 @@ std::string_view Core::gameTitle(std::size_t index) const noexcept
 bool Core::isLoadedGameActive() const noexcept
 {
     return _currGame != nullptr && _currGame != &_userInputMenu && _currGame != &_selectMenu;
+}
+
+void Core::startPlayerInput()
+{
+    _inputPlayer.name.clear();
+    _inputPlayer.score = 0;
+    _currPlayer = &_inputPlayer;
+}
+
+Arcade::Player* Core::findPlayerByName(std::string_view name) const noexcept
+{
+    for (const auto& player : _players) {
+        if (player->name == name) {
+            return player.get();
+        }
+    }
+    return nullptr;
 }
 
 void Core::queueGameSwitch(Arcade::IGame* nextGame)
