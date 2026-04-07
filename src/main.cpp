@@ -1,43 +1,15 @@
-#include <dlfcn.h>
+#include <exception>
 #include <iostream>
-#include "Arcade/game.hpp"
-#include "Arcade/display.hpp"
-#include "Arcade/utils.hpp"
+#include "core/core.hpp"
 
 int main(int argc, char* argv[])
 {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <path_to_graphic_lib>" << std::endl;
-        return 1;
+    try {
+        return core(argc, argv);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown error." << std::endl;
     }
-
-    Arcade::Color color(255, 0, 0);
-
-    void* handle = dlopen(argv[1], RTLD_NOW);
-    if (!handle) {
-        std::cerr << dlerror() << std::endl;
-        return 1;
-    }
-
-    auto createDisplay = reinterpret_cast<Arcade::DisplayEntryPointFnc>(::dlsym(handle, Arcade::DISPLAY_ENTRYPOINT));
-
-    if (!createDisplay) {
-        std::cerr << "Not a game library.\n";
-        dlclose(handle);
-        return 1;
-    }
-
-    Arcade::IDisplay* graphic = createDisplay();
-
-    graphic->open();
-
-    graphic->draw(Arcade::Text{"hihi"});
-    graphic->display();
-
-    char c;
-    std::cin >> c;
-    graphic->close();
-
-    delete graphic;
-    return 0;
+    return 1;
 }

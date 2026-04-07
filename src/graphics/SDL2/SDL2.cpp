@@ -115,7 +115,7 @@ std::pair<Arcade::Coordinate, Arcade::Coordinate> SDL2Graphic::size() const noex
 
 std::string_view SDL2Graphic::libraryName() const noexcept
 {
-    return "ADR SDL2";
+    return "BAM SDL2";
 }
 
 void SDL2Graphic::setIsWinOpen(bool newState)

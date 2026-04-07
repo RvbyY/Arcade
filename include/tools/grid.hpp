@@ -15,30 +15,27 @@
  *                                                                                      *
  * ------------------------------------------------------------------------------------ */
 
-#ifndef INCLUDED_GRID_HPP
-    #define INCLUDED_GRID_HPP
+#pragma once
 
 #include <vector>
+#include <concepts>
+#include "Arcade/utils.hpp"
 
-namespace tools
+namespace Tools
 {
-    enum Direction {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
-    };
-
     enum CellType {
         WALL,
         EMPTY,
+        APPLE,
+        BODY,
+        HEAD,
         PACGUN,
         GHOST
     };
 
     struct Vec2 {
-        int x;
-        int y;
+        Arcade::Coordinate x;
+        Arcade::Coordinate y;
 
         Vec2 operator+(const Vec2& other) const
         {
@@ -54,6 +51,12 @@ namespace tools
             };
         }
 
+        void operator=(const Vec2& other)
+        {
+            x = other.x;
+            y = other.y;
+        }
+
         bool operator==(const Vec2& other) const
         {
             return x == other.x && y == other.y;
@@ -65,6 +68,12 @@ namespace tools
         }
     };
 
+    namespace Direction {
+        inline constexpr Vec2 UP = {0, -1};
+        inline constexpr Vec2 DOWN = {0, 1};
+        inline constexpr Vec2 LEFT = {-1, 0};
+        inline constexpr Vec2 RIGHT = {1, 0};
+    }
     struct Vec2Hash {
         std::size_t operator()(const Vec2& v) const {
             return std::hash<int>()(v.x) ^ (std::hash<int>()(v.y) << 16);
@@ -72,20 +81,46 @@ namespace tools
     };
 
     template<typename T>
-    class grid {
-        private:
-        public:
-            int _width;
-            int _height;
-            std::vector<T> _cells;
-            grid(int w, int h, T defaultValue = T{}) : _width(w), _height(h), _cells(w * h, defaultValue) {}
-            int index(Vec2 pos) const;
-            bool inBounds(Vec2 pos) const;
-            T getPosition(Vec2 pos) const;
-            void setPosition(Vec2 pos, T value);
-            Vec2 wrap(Vec2 pos) const;
-            ~grid() = default;
+    struct Grid {
+            int width;
+            int height;
+            std::vector<T> cells;
+
+            Grid(int w, int h, T defaultValue = T{}) : width(w), height(h), cells(w * h, defaultValue) {}
+            ~Grid() = default;
+
+            void reset(T value)
+            {
+                cells = std::vector<T>(width * height, value);
+            }
+
+            int index(Vec2 pos) const
+            {
+                return pos.y * width + pos.x;
+            }
+
+            bool inBounds(Vec2 pos) const
+            {
+                return pos.x >= 0 && pos.x < width
+                    && pos.y >= 0 && pos.y < height;
+            }
+
+            T getPosition(Vec2 pos) const
+            {
+                return cells[index(pos)];
+            }
+
+            void setPosition(Vec2 pos, T value)
+            {
+                cells[index(pos)] = value;
+            }
+
+            Vec2 wrap(Vec2 pos) const
+            {
+                return {
+                    ((pos.x % width) + width) % width,
+                    ((pos.y % height) + height) % height
+                };
+            }
     };
 }
-
-#endif

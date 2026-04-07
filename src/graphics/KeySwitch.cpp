@@ -4,6 +4,9 @@
 
 std::optional<Arcade::Event> NcursesGraphic::KeySwitch(int ch)
 {
+    if (ch >= 'A' && ch <= 'Z')
+        ch += ('a' - 'A');
+
     switch (ch) {
         case 'a':           return Arcade::Event::ARC_KEY_A;
         case 'b':           return Arcade::Event::ARC_KEY_B;
