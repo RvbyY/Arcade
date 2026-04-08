@@ -53,6 +53,7 @@ namespace Arcade {
             std::mt19937 _rng;
             std::deque<Tools::Vec2> _snake;               // front = head
             Tools::Vec2 _dir;
+            Tools::Vec2 _nextDir;
             std::chrono::nanoseconds _accumulator;
             bool _gameOver;
     };

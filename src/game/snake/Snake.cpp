@@ -68,6 +68,7 @@ void Snake::init()
     }
     _grid.setPosition({MAP_WIDTH / 2, MAP_HEIGHT / 2}, Tools::HEAD);
     _dir = Tools::Direction::RIGHT;
+    _nextDir = _dir;
 }
 
 void Snake::destroy()
@@ -89,10 +90,10 @@ void Snake::handleEvent(Events::Event evt, IDisplay&)
     namespace Dir = Tools::Direction;
     switch (evt)
     {
-    case ARC_ARROW_UP: return _dir = _dir != Dir::DOWN ? Dir::UP : _dir;
-    case ARC_ARROW_DOWN: return _dir = _dir != Dir::UP ? Dir::DOWN : _dir;
-    case ARC_ARROW_LEFT: return _dir = _dir != Dir::RIGHT ? Dir::LEFT : _dir;
-    case ARC_ARROW_RIGHT: return _dir = _dir != Dir::LEFT ? Dir::RIGHT : _dir;
+    case ARC_ARROW_UP: return _nextDir = _dir != Dir::DOWN ? Dir::UP : _dir;
+    case ARC_ARROW_DOWN: return _nextDir = _dir != Dir::UP ? Dir::DOWN : _dir;
+    case ARC_ARROW_LEFT: return _nextDir = _dir != Dir::RIGHT ? Dir::LEFT : _dir;
+    case ARC_ARROW_RIGHT: return _nextDir = _dir != Dir::LEFT ? Dir::RIGHT : _dir;
     case ARC_KEY_R : return restart();
     default:
         return;
@@ -108,6 +109,7 @@ void Snake::update(std::chrono::nanoseconds dt, Player& player)
         return;
     _accumulator -= MOVE_DELAY;
 
+    _dir = _nextDir;
     auto nextCell = _grid.wrap(_snake.front() + _dir);
     if (_grid.getPosition(nextCell) == Tools::APPLE) {
         eatApple();

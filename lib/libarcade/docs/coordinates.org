@@ -1,0 +1,147 @@
+#+title: libarcade Coordinates
+#+author: Christophe DRONNE
+#+date: Wed Mar 18 09:39:49 2026
+
+In order to ensure that everything gets rendered the
+same way regardless of the display that was used to
+render a frame.
+
+libarcade's coordinate system is based on rectangular
+cells, similar to what you'd be used to from a terminal
+window. The purpose of this documentation is to provide
+a unified way of converting coordinates to libarcade's
+system, since graphical libraries are all free to have
+their own coordinate systems.
+
+** Conversion function
+
+The conversion function(s) supplied in
+this section is based on the formula
+described in the [[Mathematical formula]]
+section.
+
+*** Simplified function
+This special case of the formula
+applies to displays whose coordinate
+system corresponds to the usual pixel
+range coordinate system.
+
+The function works as follows (in pseudocode):
+#+begin_src
+fn convert_coords(x, y)
+    cell_size := get_cell_size()
+    win_size := get_window_size()
+
+    cell_cols := ceil(win_size.width / cell_size.width)
+    cell_rows := ceil(win_size.height / cell_size.height)
+
+    new_x := (x / win_size.width) * cell_cols
+    new_y := (y / win_size.height) * cell_rows
+
+    return new_x, new_y
+#+end_src
+
+#+begin_quote
+[!NOTE]
+Terminal displays (such as ~ncurses~) don't
+need to convert any coordinates, since their
+coordinates are already in the appropriate system.
+#+end_quote
+
+
+** Mathematical formula
+
+This section covers the mathematical
+formula for the conversion to libarcade's
+coordinate system.
+
+First, we define our native display window's coordinate
+system in the form of a /width/ and /height/ ranges:
+
+#+begin_src math
+\begin{alignat*}{2}
+R_{wscreen} &\subset \mathbb{R} \text{, such that } R_{wscreen} &&= \left[ B_{wl}; B_{wu} \right[ &\\
+R_{hscreen} &\subset \mathbb{R} \text{, such that } R_{hscreen} &&= \left[ B_{hl}; B_{hu} \right[ &
+\end{alignat*}
+#+end_src
+
+For instance, if our dislay uses the typical screen coordinate
+system on a 1920x1080 window, the ranges would be:
+
+#+begin_src math
+\begin{alignat*}{1}
+R_{wscreen} &= \left[ 0; 1920 \right[ &\\
+R_{hscreen} &= \left[ 0; 1080 \right[ &
+\end{alignat*}
+#+end_src
+
+#+begin_quote
+[!NOTE]
+The name of constants always follow the same pattern:
+~B_{wl}~, for instance, is to be read as: "Bound, lower width".
+As its name indicates, it denotes the lower bound of the display
+window's width (regardless of coordinate system).
+
+The same applies to the other constants:
+
+- ~B_{wl}~ -> Bound, lower width
+- ~B_{wu}~ -> Bound, upper width
+- ~B_{hl}~ -> Bound, lower height
+- ~B_{hu}~ -> Bound, upper height
+- ~R_{wscreen}~ -> Range, screen width
+- ~R_{hscreen}~ -> Range, screen height
+#+end_quote
+
+Next, we need to define how big libarcade's cells will be:
+#+begin_src math
+\begin{alignat*}{1}
+W_{cell} &\in \mathbb{R} \text{, with } 0 < W_{cell} < B_{u} - B_{l} \\
+H_{cell} &\in \mathbb{R} \text{, with } 0 < W_{cell} < B_{u} - B_{l} \\
+\end{alignat*}
+#+end_src
+
+#+begin_quote
+[!CAUTION]
+Terminal displays *must* use a cell size of ~1x1~.
+#+end_quote
+
+Once we have our cells' width and height, we can determine
+how many cells can fit on our screen:
+#+begin_src math
+\begin{alignat*}{1}
+C_{wcount} &= ceil \left( \frac{B_{wu} - B_{wl}}{W_{cell}} \right) \\
+C_{hcount} &= ceil \left( \frac{B_{hu} - B_{hl}}{W_{cell}} \right)
+\end{alignat*}
+#+end_src
+
+Now that everything we need has been defined, we can
+define a function that normalizes a mathematical
+range to $$ \left[ 0; 1 \right $$, which will greatly
+simplify our conversion.
+
+#+begin_src math
+\begin{alignat*}{2}
+norm_{w}(x):
+  &R_{wscreen} \mapsto \left[ 0; 1 \right[
+  &&= \frac{x - B_{wl}}{B_{wu} - B_{wl}} \\
+norm_{h}(y):
+  &R_{hscreen} \mapsto \left[ 0; 1 \right[
+  &&= \frac{y - B_{wl}}{B_{hu} - B_{hl}}
+\end{alignat*}
+#+end_src
+
+We can now write a pair of functions that lets
+us convert any coordinate from our display window's
+native coordinate system to libarcade's coordinate
+system:
+
+#+begin_src math
+\begin{alignat*}{2}
+cell_{w}(x):
+  &R_{wscreen} \mapsto [\![ 0; C_{wcount} ]\!]
+  &&= floor \left( norm_{w}(x) \times C_{wcount} \right) \\
+cell_{h}(y):
+  &R_{hscreen} \mapsto [\![ 0; C_{hcount} ]\!]
+  &&= floor \left( norm_{h}(y) \times C_{hcount} \right)
+\end{alignat*}
+#+end_src
