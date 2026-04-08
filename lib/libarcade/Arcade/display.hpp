@@ -14,6 +14,7 @@
 #include "utils/text.hpp"
 #include <string_view>
 #include <optional>
+#include <any>
 
 
 namespace Arcade {
@@ -67,6 +68,8 @@ namespace Arcade {
              * completely black.
              */
             virtual void clear() = 0;
+
+            virtual std::any convert_coords(int x, int y) const = 0;
 
             /**
              * Updates the display's

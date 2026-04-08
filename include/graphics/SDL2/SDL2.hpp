@@ -17,6 +17,9 @@ public:
 
     void draw(const Arcade::Shapes::Point& point) override;
 
+    template<typename T>
+    T convert_coords(int x, int y) const override;
+
     void draw(const Arcade::Shapes::Rectangle& rect) override;
 
     void draw(const Arcade::Text& text) override;
