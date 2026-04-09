@@ -90,7 +90,11 @@ int Core::game_loop()
 
         _currDisplay->clear();
         _currGame->render(*_currDisplay);
+        if (_debugOverlay) {
+            _debugOverlay->render(*_currDisplay);
+        }
         _currDisplay->display();
+
 
         auto frameEnd = std::chrono::steady_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::nanoseconds>(frameEnd - now);
