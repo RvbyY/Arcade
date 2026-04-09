@@ -37,28 +37,41 @@ endmacro()
 
 # ─── Arcade lib ───────────────────────────────────────────────────────────────
 
-include(ExternalProject)
 set(LIBARCADE_SRC_DIR ${CMAKE_SOURCE_DIR}/lib/libarcade)
 set(LIBARCADE_MAKEFILE ${LIBARCADE_SRC_DIR}/Makefile)
+option(ARCADE_FORCE_LIBARCADE_CLONE "Force re-cloning lib/libarcade from the remote repository" OFF)
 
-if (EXISTS "${LIBARCADE_MAKEFILE}")
-    set(LIBARCADE_BUILD_CMD ${CMAKE_MAKE_PROGRAM} no-repo)
+if (ARCADE_FORCE_LIBARCADE_CLONE)
+    include(ExternalProject)
+    ExternalProject_Add(libarcade
+        GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
+        GIT_TAG main
+        SOURCE_DIR ${LIBARCADE_SRC_DIR}
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} no-repo
+        INSTALL_COMMAND ""
+        BUILD_IN_SOURCE 1
+    )
+elseif (EXISTS "${LIBARCADE_SRC_DIR}")
+    if (EXISTS "${LIBARCADE_MAKEFILE}")
+        add_custom_target(libarcade
+            COMMAND ${CMAKE_MAKE_PROGRAM} no-repo
+            WORKING_DIRECTORY ${LIBARCADE_SRC_DIR}
+            COMMENT "Cleaning existing lib/libarcade checkout"
+        )
+    else()
+        add_custom_target(libarcade
+            COMMAND ${CMAKE_COMMAND} -E echo "Using existing lib/libarcade directory"
+        )
+    endif()
 else()
-    set(LIBARCADE_BUILD_CMD "")
+    message(FATAL_ERROR
+        "Missing ${LIBARCADE_SRC_DIR}. Provide the directory locally or configure with "
+        "-DARCADE_FORCE_LIBARCADE_CLONE=ON to clone it."
+    )
 endif()
 
-
-ExternalProject_Add(libarcade
-    GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
-    GIT_TAG main
-    SOURCE_DIR ${LIBARCADE_SRC_DIR}
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
-    # BUILD_COMMAND ${LIBARCADE_BUILD_CMD}
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-)
 add_dependencies(arcade libarcade)
 
 target_include_directories(arcade PUBLIC lib/libarcade)
