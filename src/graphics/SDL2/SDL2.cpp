@@ -42,6 +42,20 @@ void SDL2Graphic::clear()
     SDL_RenderClear(_renderer);
 }
 
+template<typename T>
+T SDL2Graphic::convert_coords(int x, int y) const
+{
+    auto cell_size = {5, 5};
+    auto win_size = SDL2Graphic::size();
+    auto cell_cols = SDL2Graphic::ceil(win_size.first / cell_size.begin);
+    auto cell_rows = SDL2Graphic::ceil(win_size.second / cell_size.end);
+    auto new_x = x / win_size.width * cell_cols;
+    auto new_y = y / win_size.height * cell_rows;
+    std::pair<auto, auto> result = {new_x, new_y};
+
+    return result;
+}
+
 void SDL2Graphic::display()
 {
     SDL_RenderPresent(_renderer);
@@ -56,9 +70,11 @@ void SDL2Graphic::draw(const Arcade::Shapes::Point& point)
 
 void SDL2Graphic::draw(const Arcade::Shapes::Rectangle& rect)
 {
+
+    std::pair<int, int> convertedCoords = SDL2Graphic::convert_coords(rect.x, rect.y);
     SDL_Rect sdlRect = {
-        static_cast<int>(rect.x),
-        static_cast<int>(rect.y),
+        static_cast<int>(convertedCoords.first),
+        static_cast<int>(convertedCoords.second),
         static_cast<int>(rect.width),
         static_cast<int>(rect.height)
     };
