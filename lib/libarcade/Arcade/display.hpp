@@ -69,8 +69,6 @@ namespace Arcade {
              */
             virtual void clear() = 0;
 
-            virtual std::any convert_coords(int x, int y) const = 0;
-
             /**
              * Updates the display's
              * window to show what's

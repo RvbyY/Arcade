@@ -2,6 +2,11 @@
 #include "../../../lib/libarcade/Arcade/utils/types.hpp"
 #include <SDL2/SDL.h>
 
+namespace {
+    constexpr int CELL_WIDTH = 24;
+    constexpr int CELL_HEIGHT = 36;
+}
+
 extern "C" {
     Arcade::IDisplay* get_display() {
         return new SDL2Graphic();
@@ -12,21 +17,36 @@ extern "C" {
 void SDL2Graphic::open()
 {
     SDL_Init(SDL_INIT_VIDEO);
+    TTF_Init();
     _window = SDL_CreateWindow(
         "Arcade",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         800, 600,
-        SDL_WINDOW_SHOWN
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
-    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-    setIsWinOpen(true);
+    if (!_window) {
+        setIsWinOpen(false);
+        return;
+    }
+    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!_renderer)
+        _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_SOFTWARE);
+    _font = TTF_OpenFont("assets/fonts/DejaVuSansMono.ttf", CELL_HEIGHT);
+    if (!_font)
+        _font = TTF_OpenFont("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", CELL_HEIGHT);
+    setIsWinOpen(_renderer != nullptr);
 }
 
 void SDL2Graphic::close() noexcept
 {
+    if (_font) {
+        TTF_CloseFont(_font);
+        _font = nullptr;
+    }
     SDL_DestroyRenderer(_renderer);
     SDL_DestroyWindow(_window);
+    TTF_Quit();
     SDL_Quit();
     setIsWinOpen(false);
 }
@@ -42,18 +62,12 @@ void SDL2Graphic::clear()
     SDL_RenderClear(_renderer);
 }
 
-template<typename T>
-T SDL2Graphic::convert_coords(int x, int y) const
+std::pair<int, int> SDL2Graphic::convert_coords(Arcade::Coordinate x, Arcade::Coordinate y) const
 {
-    auto cell_size = {5, 5};
-    auto win_size = SDL2Graphic::size();
-    auto cell_cols = SDL2Graphic::ceil(win_size.first / cell_size.begin);
-    auto cell_rows = SDL2Graphic::ceil(win_size.second / cell_size.end);
-    auto new_x = x / win_size.width * cell_cols;
-    auto new_y = y / win_size.height * cell_rows;
-    std::pair<auto, auto> result = {new_x, new_y};
-
-    return result;
+    return {
+        static_cast<int>(x) * CELL_WIDTH,
+        static_cast<int>(y) * CELL_HEIGHT
+    };
 }
 
 void SDL2Graphic::display()
@@ -63,24 +77,30 @@ void SDL2Graphic::display()
 
 void SDL2Graphic::draw(const Arcade::Shapes::Point& point)
 {
+    std::pair<int, int> convertedCoords = convert_coords(point.x, point.y);
+    SDL_Rect cellRect = {
+        convertedCoords.first,
+        convertedCoords.second,
+        CELL_WIDTH,
+        CELL_HEIGHT
+    };
     SDL_SetRenderDrawColor(_renderer,
         point.color.red, point.color.green, point.color.blue, point.color.alpha);
-    SDL_RenderDrawPoint(_renderer, point.x, point.y);
+    SDL_RenderFillRect(_renderer, &cellRect);
 }
 
 void SDL2Graphic::draw(const Arcade::Shapes::Rectangle& rect)
 {
-
-    std::pair<int, int> convertedCoords = SDL2Graphic::convert_coords(rect.x, rect.y);
+    std::pair<int, int> convertedCoords = convert_coords(rect.x, rect.y);
     SDL_Rect sdlRect = {
-        static_cast<int>(convertedCoords.first),
-        static_cast<int>(convertedCoords.second),
-        static_cast<int>(rect.width),
-        static_cast<int>(rect.height)
+        convertedCoords.first,
+        convertedCoords.second,
+        static_cast<int>(rect.width + (rect.width == 0)) * CELL_WIDTH,
+        static_cast<int>(rect.height + (rect.height == 0)) * CELL_HEIGHT
     };
     SDL_SetRenderDrawColor(_renderer,
         rect.color.red, rect.color.green, rect.color.blue, rect.color.alpha);
-    SDL_RenderDrawRect(_renderer, &sdlRect);
+    SDL_RenderFillRect(_renderer, &sdlRect);
 }
 
 void SDL2Graphic::draw(const Arcade::Text& text)
@@ -90,7 +110,8 @@ void SDL2Graphic::draw(const Arcade::Text& text)
     SDL_Surface* surface = TTF_RenderText_Solid(_font, text.content.c_str(), color);
     if (!surface) return;
     SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
-    SDL_Rect dst = { static_cast<int>(text.x), static_cast<int>(text.y), surface->w, surface->h };
+    std::pair<int, int> convertedCoords = convert_coords(text.x, text.y);
+    SDL_Rect dst = { convertedCoords.first, convertedCoords.second, surface->w, surface->h };
     SDL_FreeSurface(surface);
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
     SDL_DestroyTexture(texture);
@@ -119,14 +140,20 @@ std::pair<Arcade::Coordinate, Arcade::Coordinate> SDL2Graphic::mousePosition() c
 {
     int x = 0, y = 0;
     SDL_GetMouseState(&x, &y);
-    return { x, y };
+    return {
+        static_cast<Arcade::Coordinate>(x / CELL_WIDTH),
+        static_cast<Arcade::Coordinate>(y / CELL_HEIGHT)
+    };
 }
 
 std::pair<Arcade::Coordinate, Arcade::Coordinate> SDL2Graphic::size() const noexcept
 {
     int w = 0, h = 0;
     SDL_GetWindowSize(_window, &w, &h);
-    return { w, h };
+    return {
+        static_cast<Arcade::Coordinate>(w / CELL_WIDTH),
+        static_cast<Arcade::Coordinate>(h / CELL_HEIGHT)
+    };
 }
 
 std::string_view SDL2Graphic::libraryName() const noexcept
