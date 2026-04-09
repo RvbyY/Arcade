@@ -34,6 +34,8 @@ namespace Arcade {
             std::string_view gameTitle() const noexcept override { return "Select Menu - BAM"; }
 
         private:
+            void updateCoreSelect(int delta);
+
             Core& _core;
             SelectType _selected = SelectType::Graphics;
             std::optional<Events::Event> _pendingEvent;

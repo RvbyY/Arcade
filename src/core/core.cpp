@@ -170,12 +170,12 @@ std::size_t Core::gameCount() const noexcept
     return _games.size();
 }
 
-std::size_t Core::selectedDisplayIndex() const noexcept
+std::size_t Core::getSelectedDisplayIndex() const noexcept
 {
     return _selectedDisplayIndex;
 }
 
-std::size_t Core::selectedGameIndex() const noexcept
+std::size_t Core::getSelectedGameIndex() const noexcept
 {
     return _selectedGameIndex;
 }

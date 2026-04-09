@@ -38,8 +38,8 @@ class Core {
     std::size_t displayCount() const noexcept;
     std::size_t gameCount() const noexcept;
 
-    std::size_t selectedDisplayIndex() const noexcept;
-    std::size_t selectedGameIndex() const noexcept;
+    std::size_t getSelectedDisplayIndex() const noexcept;
+    std::size_t getSelectedGameIndex() const noexcept;
 
     std::string_view displayName(std::size_t index) const noexcept;
     std::string_view gameTitle(std::size_t index) const noexcept;

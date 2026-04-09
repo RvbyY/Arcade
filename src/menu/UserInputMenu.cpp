@@ -34,14 +34,11 @@ void Arcade::UserInputMenu::update(std::chrono::nanoseconds dt, Player& player)
     }
     switch (*_pendingEvent) {
         case Arcade::Event::ARC_KEY_RETURN:
-            if (_core.confirmCurrentPlayerSelection()) {
-                _core.switchToSelectMenu();
-            }
-            break;
+            if (_core.confirmCurrentPlayerSelection())
+                return _core.switchToSelectMenu();
         case Arcade::Event::ARC_KEY_BACKSPACE:
-            if (!username.empty()) {
+            if (!username.empty())
                 username.pop_back();
-            }
             break;
         default: {
             const char character = EventToChar(*_pendingEvent);
