@@ -31,6 +31,6 @@ namespace Arcade {
             std::string_view gameTitle() const noexcept override { return "Debug Overlay - BAM"; }
 
         private:
-            Core& _core;
+            Core* _core;
     };
 }

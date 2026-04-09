@@ -15,7 +15,7 @@ Core::Core(int argc, char** argv)
     : _args(argv, argc)
     , _userInputMenu(*this)
     , _selectMenu(*this)
-    , _debugOverlay(*this)
+    , _debugOverlay()
 {
 }
 

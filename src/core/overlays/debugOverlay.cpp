@@ -9,10 +9,9 @@
 #include "../../include/core/core.hpp"
 
 Arcade::DebugOverlay::DebugOverlay(Core& core)
-    : _core(core)
+    : _core(&core)
 {
 }
-
 
 void Arcade::DebugOverlay::init()
 {
@@ -39,11 +38,11 @@ void Arcade::DebugOverlay::render(IDisplay& display)
     auto [width, height] = display.size();
 
     Arcade::Text displayText("Graphical library: ", 0, 5, Arcade::GREEN);
-    displayText.content += _core.displayName();
+    displayText.content += _core->displayName();
     displayText.x = width - displayText.content.length() - 5;
 
     Arcade::Text gameText("Game library: ", 0, 8, Arcade::GREEN);
-    gameText.content += _core.gameTitle();
+    gameText.content += _core->gameTitle();
     gameText.x = width - gameText.content.length() - 5;
 
     display.draw(displayText);

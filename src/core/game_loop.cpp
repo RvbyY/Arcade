@@ -16,22 +16,10 @@ using std::chrono_literals::operator ""ns;
 namespace {
 std::optional<std::size_t> getDisplayShortcutIndex(Arcade::Events::Event evt)
 {
-    switch (evt) {
-        case Arcade::Events::ARC_KEY_F1: return 0;
-        case Arcade::Events::ARC_KEY_F2: return 1;
-        case Arcade::Events::ARC_KEY_F3: return 2;
-        case Arcade::Events::ARC_KEY_F4: return 3;
-        case Arcade::Events::ARC_KEY_F5: return 4;
-        case Arcade::Events::ARC_KEY_F6: return 5;
-        case Arcade::Events::ARC_KEY_F7: return 6;
-        case Arcade::Events::ARC_KEY_F8: return 7;
-        case Arcade::Events::ARC_KEY_F9: return 8;
-        case Arcade::Events::ARC_KEY_F10: return 9;
-        case Arcade::Events::ARC_KEY_F11: return 10;
-        case Arcade::Events::ARC_KEY_F12: return 11;
+    if (!(Arcade::Events::ARC_KEY_F1 <= evt && evt <= Arcade::Events::ARC_KEY_F12))
+        return std::nullopt;
 
-        default: return std::nullopt;
-    }
+    return evt - Arcade::Events::ARC_KEY_F1;
 }
 
 bool handleGlobalEvent(Core& core, Arcade::Events::Event evt)
@@ -62,7 +50,7 @@ int Core::game_loop()
     constexpr std::chrono::nanoseconds FRAME_TIME{16'666'667}; // ~60 FPS cap
 
     while (_currDisplay->isOpen()) {
-        if (auto evt = _currDisplay->pollEvent()) {
+        while (auto evt = _currDisplay->pollEvent()) {
             if (*evt == Arcade::Events::ARC_CLOSE) {
                 break;
             }
@@ -74,6 +62,8 @@ int Core::game_loop()
                 }
                 break;
             }
+            if (*evt == Arcade::Event::ARC_KEY_P && _currGame != &_userInputMenu)
+                _debugOverlay = _debugOverlay ? std::nullopt : std::make_optional(Arcade::DebugOverlay(*this));
             if (handleGlobalEvent(*this, *evt)) {
                 applyPendingGameSwitch();
             } else {
