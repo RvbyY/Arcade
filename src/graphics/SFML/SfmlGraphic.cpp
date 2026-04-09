@@ -40,7 +40,7 @@ void SfmlGraphic::open()
     _window.create(
         sf::VideoMode(1280, 720),
         "Arcade",
-        sf::Style::Close | sf::Style::Titlebar
+        sf::Style::Close | sf::Style::Titlebar | sf::Style::Resize
     );
     _window.setFramerateLimit(60);
 
@@ -76,37 +76,33 @@ void SfmlGraphic::display()
     _window.display();
 }
 
+sf::Vector2f SfmlGraphic::convertCoords(Arcade::Coordinate x, Arcade::Coordinate y) const
+{
+    return {
+        static_cast<float>(x) * CELL_W,
+        static_cast<float>(y) * CELL_H
+    };
+}
+
 // ─── Draw overloads ──────────────────────────────────────────────────────────
 
 void SfmlGraphic::draw(const Arcade::Shapes::Point& point)
 {
     sf::RectangleShape cell(sf::Vector2f(CELL_W, CELL_H));
-    cell.setPosition(point.x * CELL_W, point.y * CELL_H);
+    cell.setPosition(convertCoords(point.x, point.y));
     cell.setFillColor(ColorToSfml(point.color));
     _window.draw(cell);
 }
 
 void SfmlGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 {
-    sf::Color color = ColorToSfml(rect.color);
-
-    for (int row = rect.y; row < rect.y + rect.height; ++row) {
-        for (int col = rect.x; col < rect.x + rect.width; ++col) {
-            bool isBorder = (row == rect.y || row == rect.y + rect.height - 1 ||
-                             col == rect.x || col == rect.x + rect.width - 1);
-
-            sf::RectangleShape cell(sf::Vector2f(CELL_W, CELL_H));
-            cell.setPosition(col * CELL_W, row * CELL_H);
-
-            if (isBorder) {
-                cell.setFillColor(color);
-            } else {
-                // Interior: transparent / black fill, matching ncurses ' '
-                cell.setFillColor(sf::Color::Black);
-            }
-            _window.draw(cell);
-        }
-    }
+    sf::RectangleShape shape(sf::Vector2f(
+        static_cast<float>(rect.width + (rect.width == 0)) * CELL_W,
+        static_cast<float>(rect.height + (rect.height == 0)) * CELL_H
+    ));
+    shape.setPosition(convertCoords(rect.x, rect.y));
+    shape.setFillColor(ColorToSfml(rect.color));
+    _window.draw(shape);
 }
 
 void SfmlGraphic::draw(const Arcade::Text& text)
@@ -116,7 +112,7 @@ void SfmlGraphic::draw(const Arcade::Text& text)
     sfText.setString(text.content);
     sfText.setCharacterSize(static_cast<unsigned int>(CELL_H));
     sfText.setFillColor(ColorToSfml(text.color));
-    sfText.setPosition(text.x * CELL_W, text.y * CELL_H);
+    sfText.setPosition(convertCoords(text.x, text.y));
     _window.draw(sfText);
 }
 
@@ -159,7 +155,7 @@ std::pair<Arcade::Coordinate, Arcade::Coordinate> SfmlGraphic::size() const noex
 
 std::string_view SfmlGraphic::libraryName() const noexcept
 {
-    return "ADR SFML";
+    return "BAM SFML";
 }
 
 // ─── Internal state ──────────────────────────────────────────────────────────
