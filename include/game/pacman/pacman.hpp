@@ -17,6 +17,8 @@ namespace Arcade {
             void handleEvent(Events::Event evt, IDisplay& display) override;
             void update(std::chrono::nanoseconds dt, Player& player) override;
             void render(IDisplay& display) override;
+            void setPacmanPosition();
+            void setGhostsPositions();
             void restart();
 
             std::string_view gameTitle() const noexcept override { return "PacMan - BAM"; }
@@ -28,6 +30,8 @@ namespace Arcade {
             static constexpr int MAP_HEIGHT = 30;
             static constexpr int GHOST_ZONE_WIDTH = 5;
             static constexpr int GHOST_ZONE_HEIGHT = 4;
+            static constexpr int TARGET_GUN = 2;
+            static constexpr int GUN_MAX_ATTEMPs = 50;
             static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
 
             // helpers
@@ -41,6 +45,7 @@ namespace Arcade {
             Tools::Grid<Tools::CellType> _grid;
             std::mt19937 _rng;
             Tools::Vec2 _pacman;
+            std::deque<Tools::Vec2> _ghosts;
             std::optional<Tools::Vec2> _dir;
             std::chrono::nanoseconds _accumulator;
             bool _gameOver;
