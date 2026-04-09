@@ -37,6 +37,22 @@ void Arcade::SelectMenu::handleEvent(Events::Event evt, IDisplay& display)
     _pendingEvent = evt;
 }
 
+void Arcade::SelectMenu::updateCoreSelect(int delta)
+{
+    switch (_selected) {
+        case SelectType::Graphics:
+            if (_core.displayCount() > 0) {
+                _core.selectDisplay(wrapIndex(_core.getSelectedDisplayIndex(), delta, _core.displayCount()));
+            }
+            break;
+        case SelectType::Games:
+            if (_core.gameCount() > 0) {
+                _core.selectGame(wrapIndex(_core.getSelectedGameIndex(), delta, _core.gameCount()));
+            }
+            break;
+    }
+}
+
 void Arcade::SelectMenu::update(std::chrono::nanoseconds dt, Player& player)
 {
     (void)dt;
@@ -46,18 +62,10 @@ void Arcade::SelectMenu::update(std::chrono::nanoseconds dt, Player& player)
     }
     switch (*_pendingEvent) {
         case Arcade::Event::ARC_ARROW_UP:
-            if (_selected == SelectType::Graphics && _core.displayCount() > 0) {
-                _core.selectDisplay(wrapIndex(_core.selectedDisplayIndex(), -1, _core.displayCount()));
-            } else if (_selected == SelectType::Games && _core.gameCount() > 0) {
-                _core.selectGame(wrapIndex(_core.selectedGameIndex(), -1, _core.gameCount()));
-            }
+            updateCoreSelect(-1);
             break;
         case Arcade::Event::ARC_ARROW_DOWN:
-            if (_selected == SelectType::Graphics && _core.displayCount() > 0) {
-                _core.selectDisplay(wrapIndex(_core.selectedDisplayIndex(), 1, _core.displayCount()));
-            } else if (_selected == SelectType::Games && _core.gameCount() > 0) {
-                _core.selectGame(wrapIndex(_core.selectedGameIndex(), 1, _core.gameCount()));
-            }
+            updateCoreSelect(1);
             break;
         case Arcade::Event::ARC_ARROW_LEFT:
             _selected = SelectType::Graphics;
@@ -90,7 +98,7 @@ void Arcade::SelectMenu::render(IDisplay& display)
     display.draw(Arcade::Text{"Games", gamesX, 2, normalColor});
 
     for (std::size_t i = 0; i < _core.displayCount(); ++i) {
-        const bool isSelected = i == _core.selectedDisplayIndex();
+        const bool isSelected = i == _core.getSelectedDisplayIndex();
         const bool isSelectTypeed = _selected == SelectType::Graphics && isSelected;
         std::string label;
 
@@ -108,7 +116,7 @@ void Arcade::SelectMenu::render(IDisplay& display)
     }
 
     for (std::size_t i = 0; i < _core.gameCount(); ++i) {
-        const bool isSelected = i == _core.selectedGameIndex();
+        const bool isSelected = i == _core.getSelectedGameIndex();
         const bool isSelectTypeed = _selected == SelectType::Games && isSelected;
         const std::string label = std::string(_core.gameTitle(i));
 
