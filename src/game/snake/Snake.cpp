@@ -14,7 +14,8 @@ using std::chrono_literals::operator ""ns;
 Snake::Snake()
     : _rng( std::random_device{}() )
     , _grid(MAP_WIDTH, MAP_HEIGHT, Tools::EMPTY)
-    , nbApples(0)
+    , _nbApples(0)
+    , _gameScore(0)
     , _accumulator(0)
     , _gameOver(false)
 {
@@ -38,27 +39,27 @@ std::optional<Tools::Vec2> Snake::getRandomEmptyCoord()
 
 bool Snake::spawnApple()
 {
-    if (nbApples >= TARGET_APPLES)
+    if (_nbApples >= TARGET_APPLES)
         return false;
     auto appleCoords = getRandomEmptyCoord();
 
     if (!appleCoords)
         return false;
     _grid.setPosition(*appleCoords, Tools::APPLE);
-    nbApples++;
+    _nbApples++;
     return true;
 }
 
 void Snake::eatApple()
 {
-    nbApples--;
+    _nbApples--;
     spawnApple();
 }
 
 void Snake::init()
 {
     _gameOver = false;
-    nbApples = 0;
+    _nbApples = 0;
     _accumulator = 0ns;
     _grid.reset(Tools::EMPTY);
     for (int i = 0; i < 3; i++) {
@@ -81,6 +82,7 @@ void Snake::destroy()
 
 void Snake::restart()
 {
+    _gameScore = 0;
     destroy();
     init();
 }
@@ -104,6 +106,7 @@ void Snake::update(std::chrono::nanoseconds dt, Player& player)
 {
     if (_gameOver)
         return;
+    player.score = _gameScore;
     _accumulator+=dt;
     if (_accumulator < MOVE_DELAY)
         return;
@@ -113,7 +116,7 @@ void Snake::update(std::chrono::nanoseconds dt, Player& player)
     auto nextCell = _grid.wrap(_snake.front() + _dir);
     if (_grid.getPosition(nextCell) == Tools::APPLE) {
         eatApple();
-        player.score += 1;
+        _gameScore += 1;
     } else if (_grid.getPosition(nextCell) == Tools::BODY)
     {
         _gameOver = true;
