@@ -21,27 +21,52 @@ std::optional<std::size_t> getDisplayShortcutIndex(Arcade::Events::Event evt)
 
     return evt - Arcade::Events::ARC_KEY_F1;
 }
+}
 
-bool handleGlobalEvent(Core& core, Arcade::Events::Event evt)
+bool Core::handleGlobalEvent(Arcade::Events::Event evt)
 {
     if (const auto displayIndex = getDisplayShortcutIndex(evt)) {
-        core.selectDisplay(*displayIndex);
+        selectDisplay(*displayIndex);
         return true;
     }
-    if (!core.isLoadedGameActive()) {
+    if (!isLoadedGameActive()) {
         return false;
     }
     switch (evt) {
         case Arcade::Events::ARC_KEY_G:
-            core.cycleToNextGame();
+            cycleToNextGame();
             return true;
         case Arcade::Events::ARC_KEY_M:
-            core.switchToSelectMenu();
+            switchToSelectMenu();
             return true;
         default:
             return false;
     }
 }
+
+bool Core::pollCoreEvents()
+{
+    while (auto evt = _currDisplay->pollEvent()) {
+        if (*evt == Arcade::Events::ARC_CLOSE) {
+            return false;
+        }
+        if (*evt == Arcade::Events::ARC_KEY_ESC) {
+            if (_currGame == &_selectMenu) {
+                switchToUserInputMenu();
+                applyPendingGameSwitch();
+                return true;
+            }
+            return false;
+        }
+        if (*evt == Arcade::Event::ARC_KEY_P && _currGame != &_userInputMenu)
+            _debugOverlay = _debugOverlay ? std::nullopt : std::make_optional(Arcade::DebugOverlay(*this));
+        if (handleGlobalEvent(*evt)) {
+            applyPendingGameSwitch();
+        } else {
+            _currGame->handleEvent(*evt, *_currDisplay);
+        }
+    }
+    return true;
 }
 
 int Core::game_loop()
@@ -50,27 +75,8 @@ int Core::game_loop()
     constexpr std::chrono::nanoseconds FRAME_TIME{16'666'667}; // ~60 FPS cap
 
     while (_currDisplay->isOpen()) {
-        while (auto evt = _currDisplay->pollEvent()) {
-            if (*evt == Arcade::Events::ARC_CLOSE) {
-                break;
-            }
-            if (*evt == Arcade::Events::ARC_KEY_ESC) {
-                if (_currGame == &_selectMenu) {
-                    switchToUserInputMenu();
-                    applyPendingGameSwitch();
-                    continue;
-                }
-                break;
-            }
-            if (*evt == Arcade::Event::ARC_KEY_P && _currGame != &_userInputMenu)
-                _debugOverlay = _debugOverlay ? std::nullopt : std::make_optional(Arcade::DebugOverlay(*this));
-            if (handleGlobalEvent(*this, *evt)) {
-                applyPendingGameSwitch();
-            } else {
-                _currGame->handleEvent(*evt, *_currDisplay);
-            }
-        }
-
+        if (pollCoreEvents() == false)
+            break;
         auto now = std::chrono::steady_clock::now();
         auto dt = now - last;
         last = now;

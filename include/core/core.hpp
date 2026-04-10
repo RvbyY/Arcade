@@ -64,6 +64,9 @@ class Core {
     static Arcade::DisplayEntryPointFnc loadDisplayEntryPointOrThrow(void* displayHandle);
     static Arcade::GameEntryPointFnc loadGameEntryPointOrThrow(void* gameHandle);
 
+    bool handleGlobalEvent(Arcade::Events::Event evt);
+    bool pollCoreEvents();
+
     std::span<char *> _args;
     Arcade::IDisplay* _currDisplay = nullptr;
     Arcade::IGame* _currGame = nullptr;
