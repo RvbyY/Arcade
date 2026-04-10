@@ -259,6 +259,7 @@ Color PacMan::getCellColor(Tools::CellType type)
         case Tools::GHOST: return Colors::CYAN;
         case Tools::HEAD: return _superPac ? Colors::PURPLE : Colors::YELLOW;
         case Tools::WALL: return Colors::BLUE;
+        case Tools::PACGUN: return Colors::YELLOW;
         default: return Colors::BLACK;
     }
 }
