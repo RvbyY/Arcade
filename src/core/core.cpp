@@ -16,7 +16,33 @@ Core::Core(int argc, char** argv)
     , _userInputMenu(*this)
     , _selectMenu(*this)
     , _debugOverlay()
+    , _selectedDisplayIndex(0)
+    , _selectedGameIndex(0)
 {
+}
+
+static void printUsage()
+{
+    std::cout << "Usage: ./arcade <path_to_graphic_lib> [path_to_game_lib]" << std::endl << std::endl;
+    std::cout << "The action keys are as follows:" << std::endl << std::endl;
+
+    std::cout << "*In-game*" << std::endl;
+    std::cout << "  ESC       -> Quit the game" << std::endl;
+    std::cout << "  M         -> Return to the menu" << std::endl;
+    std::cout << "  G         -> Switch to the next game" << std::endl;
+    std::cout << "  R         -> Restart the current game" << std::endl;
+    std::cout << "  F1...F12  -> Switch graphical library" << std::endl << std::endl;
+
+    std::cout << "*Select Menu*" << std::endl;
+    std::cout << "  ESC       -> Go back to the username input menu" << std::endl;
+    std::cout << "  ENTER     -> Start the selected game" << std::endl << std::endl;
+
+    std::cout << "*Username Input Menu*" << std::endl;
+    std::cout << "  ESC       -> Exit the program" << std::endl;
+    std::cout << "  ENTER     -> Confirm username and load the Selection Menu (requires at least one character)" << std::endl << std::endl;
+
+    std::cout << "*Utils*" << std::endl;
+    std::cout << "  P         -> Toggle debug overlay (shows current libraries)" << std::endl;
 }
 
 int Core::run()
@@ -24,7 +50,10 @@ int Core::run()
     if (_args.size() < 2) {
         throw std::runtime_error("Usage: ./arcade <path_to_graphic_lib> [path_to_game_lib]");
     }
-
+    if (std::string_view(_args[1]) == "-h" || std::string_view(_args[1]) == "--help") {
+        printUsage();
+        return 0;
+    }
     const std::string_view preferredDisplayPath = _args[1];
     const std::string_view preferredGamePath = _args.size() >= 3 ? std::string_view(_args[2]) : std::string_view{};
 
