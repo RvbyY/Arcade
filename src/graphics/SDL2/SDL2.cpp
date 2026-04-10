@@ -18,11 +18,15 @@ void SDL2Graphic::open()
 {
     SDL_Init(SDL_INIT_VIDEO);
     TTF_Init();
+
+    SDL_DisplayMode mode;
+    SDL_GetCurrentDisplayMode(0, &mode);
+
     _window = SDL_CreateWindow(
         "Arcade",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        800, 600,
+        mode.w, mode.h,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     if (!_window) {
