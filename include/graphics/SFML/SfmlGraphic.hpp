@@ -38,6 +38,7 @@ public:
 private:
     void setIsWinOpen(bool newState);
     bool getIsWinOpen() const;
+    sf::Vector2f convertCoords(Arcade::Coordinate x, Arcade::Coordinate y) const;
 
     sf::RenderWindow _window;
     sf::Font         _font;

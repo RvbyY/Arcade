@@ -17,6 +17,8 @@
 #include "Arcade/utils.hpp"
 #include "../menu/selectMenu.hpp"
 #include "../menu/userInputMenu.hpp"
+#include "overlays/debugOverlay.hpp"
+
 
 class Core {
     public:
@@ -42,7 +44,10 @@ class Core {
     std::size_t getSelectedGameIndex() const noexcept;
 
     std::string_view displayName(std::size_t index) const noexcept;
+    std::string_view displayName() const noexcept { return _currDisplay->libraryName(); }
     std::string_view gameTitle(std::size_t index) const noexcept;
+    inline std::string_view gameTitle() const noexcept { return _currGame->gameTitle(); }
+
 
     bool isLoadedGameActive() const noexcept;
 
@@ -58,6 +63,9 @@ class Core {
     static SharedLibrary loadLibraryOrThrow(const char* path);
     static Arcade::DisplayEntryPointFnc loadDisplayEntryPointOrThrow(void* displayHandle);
     static Arcade::GameEntryPointFnc loadGameEntryPointOrThrow(void* gameHandle);
+
+    bool handleGlobalEvent(Arcade::Events::Event evt);
+    bool pollCoreEvents();
 
     std::span<char *> _args;
     Arcade::IDisplay* _currDisplay = nullptr;
@@ -80,4 +88,6 @@ class Core {
 
     Arcade::UserInputMenu _userInputMenu;
     Arcade::SelectMenu _selectMenu;
+
+    std::optional<Arcade::DebugOverlay> _debugOverlay;
 };

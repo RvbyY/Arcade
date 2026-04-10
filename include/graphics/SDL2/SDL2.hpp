@@ -37,9 +37,9 @@ public:
 
     SDL_Window   *_window   = nullptr;
     SDL_Renderer *_renderer = nullptr;
-    TTF_Font* _font;
+    TTF_Font* _font = nullptr;
 
 private:
-
+    std::pair<int, int> convert_coords(Arcade::Coordinate x, Arcade::Coordinate y) const;
     bool _isWinOpen = false;
 };

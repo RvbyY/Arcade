@@ -138,6 +138,8 @@ void Core::selectInitialLibraries(std::string_view preferredDisplayPath, std::st
 {
     if (const auto displayIndex = findPreferredIndex(_displayPaths, preferredDisplayPath)) {
         _selectedDisplayIndex = *displayIndex;
+    } else {
+        throw std::runtime_error("Invalid graphical library path provided: " + std::string(preferredDisplayPath));
     }
     if (const auto gameIndex = findPreferredIndex(_gamePaths, preferredGamePath)) {
         _selectedGameIndex = *gameIndex;
