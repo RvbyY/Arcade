@@ -23,7 +23,7 @@ void SDL2Graphic::open()
     SDL_GetCurrentDisplayMode(0, &mode);
 
     _window = SDL_CreateWindow(
-        "Arcade",
+        "Arcade SDL2 - BAM",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         mode.w, mode.h,
