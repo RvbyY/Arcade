@@ -3,6 +3,7 @@
 #include <optional>
 #include <random>
 #include <unordered_map>
+#include <set>
 #include "game.hpp"
 #include "tools/grid.hpp"
 
@@ -37,6 +38,9 @@ namespace Arcade {
             // helpers
             bool spawnPacGun();
             void eatPacGun();
+            void eatGhosts();
+            void superPacActions();
+            void moveGhosts(int);
             std::optional<Tools::Vec2> getRandomEmptyCoord();
             Arcade::Color getCellColor(Tools::CellType type);
 
@@ -44,10 +48,15 @@ namespace Arcade {
             size_t _nbPacGun;
             Tools::Grid<Tools::CellType> _grid;
             std::mt19937 _rng;
+            std::array<int, 4> _ghostPoint;
             Tools::Vec2 _pacman;
             std::deque<Tools::Vec2> _ghosts;
-            std::optional<Tools::Vec2> _dir;
+            Tools::Vec2 _dir;
             std::chrono::nanoseconds _accumulator;
             bool _gameOver;
+            bool _superPac;
+            std::chrono::nanoseconds _superPacTimer;
+            std::array<std::chrono::nanoseconds, 4> _ghostFrozenUntil;
+            std::set<Tools::Vec2> _pacGuns;
     };
 }
