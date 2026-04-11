@@ -251,7 +251,7 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
                 _gameOver = true;
             }
         }
-        if (_ghostFrozenUntil[i] < _accumulator)
+        if (_ghostFrozenUntil[i] <= _accumulator)
             PacMan::moveGhosts(i);
     }
 
