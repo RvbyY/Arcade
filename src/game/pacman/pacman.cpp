@@ -187,7 +187,7 @@ void PacMan::moveGhosts(int ghostIndex)
         }
     }
     if (!validMoves.empty()) {
-        std::uniform_int_distribution<size_t> dist(0, validMoves.size() - 1);
+        std::uniform_int_distribution<size_t> dist(0, validMoves.size());
         _ghosts[ghostIndex] = validMoves[dist(_rng)];
     }
 }

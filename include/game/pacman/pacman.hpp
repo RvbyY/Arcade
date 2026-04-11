@@ -31,9 +31,9 @@ namespace Arcade {
             static constexpr Arcade::Color PURPLE = 0x7f00ff;
             static constexpr Arcade::Color BLUE = 0x111184;
             static constexpr Arcade::Color ORANGE = 0xff9900;
-            static constexpr int NB_CELLS = 1800;
-            static constexpr int MAP_WIDTH = 60;
-            static constexpr int MAP_HEIGHT = 30;
+            static constexpr int MAP_WIDTH = 30;
+            static constexpr int MAP_HEIGHT = 15;
+            static constexpr int NB_CELLS = MAP_WIDTH * MAP_HEIGHT;
             static constexpr int GHOST_ZONE_WIDTH = 5;
             static constexpr int GHOST_ZONE_HEIGHT = 4;
             static constexpr int GHOST_ZONE_CENTER_X = MAP_WIDTH / 2;

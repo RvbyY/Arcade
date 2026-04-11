@@ -15,6 +15,7 @@ fzfaz=0
 fzfazf=90
 fzfzaf=0
 gazfazzf=0
+knf=0
 zaezzae=0
 zaffazzf=0
 zfffz=0
