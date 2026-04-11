@@ -43,7 +43,7 @@ namespace Arcade {
             static constexpr int GATE_LEFT_Y = GHOST_ZONE_CENTER_Y;
             static constexpr int TARGET_GUN = 4;
             static constexpr int GUN_MAX_ATTEMPs = 50;
-            static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
+            std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
 
             // helpers
             bool spawnPacGun();

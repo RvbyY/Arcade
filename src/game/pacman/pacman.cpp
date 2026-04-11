@@ -81,6 +81,7 @@ void PacMan::eatPacGun(Player& player)
 {
     _nbPacGun--;
     _superPac = true;
+    MOVE_DELAY = std::chrono::milliseconds(200);
     _gameScore += 10;
 }
 
@@ -244,8 +245,10 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
         }
     }
 
-    if (_superPac && _superPacTimer > 10s)
+    if (_superPac && _superPacTimer > 10s) {
         _superPac = false;
+        MOVE_DELAY = std::chrono::milliseconds(100);
+    }
     if (_nbPacGun == 0)
         _gameWon = true;
 }

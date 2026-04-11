@@ -10,6 +10,7 @@ fazfaf=0
 fazfaz=0
 fazfazf=0
 fazfz=0
+fzafzazf=0
 fzfaf=0
 fzfaz=0
 fzfazf=90
