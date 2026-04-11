@@ -100,6 +100,15 @@ int Core::game_loop()
     return 0;
 }
 
+void Core::updatePlayerScore()
+{
+    // check si le joueur a déjà un score enregistré dans le futur fichier
+    // et si oui, si son nouveau score est meilleur on l'enregistree
+    _currPlayer->maxScore = std::max(_currPlayer->maxScore, _currPlayer->score);
+    _currPlayer->score = 0;
+    _players.save();
+}
+
 void Core::applyPendingGameSwitch()
 {
     if (_pendingGame == nullptr || _pendingGame == _currGame) {
@@ -107,6 +116,7 @@ void Core::applyPendingGameSwitch()
         return;
     }
     _currGame->destroy();
+    updatePlayerScore();
     _currGame = _pendingGame;
     _pendingGame = nullptr;
     _currGame->init();

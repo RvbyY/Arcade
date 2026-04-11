@@ -45,6 +45,16 @@ void Arcade::DebugOverlay::render(IDisplay& display)
     gameText.content += _core->gameTitle();
     gameText.x = width - gameText.content.length() - 5;
 
+    Arcade::Text playerText("Player: ", 0, 10, Arcade::GREEN);
+    playerText.content += _core->getCurrentPlayer().name;
+    playerText.x = width - playerText.content.length() - 5;
+
+    Arcade::Text playerScoreText("P-Score: ", 0, 12, Arcade::GREEN);
+    playerScoreText.content += std::to_string(_core->getCurrentPlayer().score);
+    playerScoreText.x = width - playerScoreText.content.length() - 5;
+
     display.draw(displayText);
     display.draw(gameText);
+    display.draw(playerText);
+    display.draw(playerScoreText);
 }

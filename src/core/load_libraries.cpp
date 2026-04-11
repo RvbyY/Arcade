@@ -36,15 +36,13 @@ std::optional<Arcade::GameEntryPointFnc> tryLoadGameEntryPoint(void* gameHandle)
 
 std::optional<std::size_t> findPreferredIndex(const std::vector<std::string>& paths, std::string_view preferredPath)
 {
-    namespace fs = std::filesystem;
-
     if (preferredPath.empty()) {
         return std::nullopt;
     }
 
-    const fs::path preferred(preferredPath);
+    const std::filesystem::path preferred(preferredPath);
     for (std::size_t i = 0; i < paths.size(); ++i) {
-        const fs::path candidate(paths[i]);
+        const std::filesystem::path candidate(paths[i]);
 
         if (candidate == preferred || candidate.filename() == preferred.filename()) {
             return i;

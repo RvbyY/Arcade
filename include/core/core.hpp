@@ -18,6 +18,7 @@
 #include "../menu/selectMenu.hpp"
 #include "../menu/userInputMenu.hpp"
 #include "overlays/debugOverlay.hpp"
+#include "playerContainer/playerContainer.hpp"
 
 
 class Core {
@@ -32,6 +33,9 @@ class Core {
     void cycleToNextGame();
     bool selectDisplay(std::size_t index);
     bool selectGame(std::size_t index) noexcept;
+
+    inline void setPlayer(const std::string& name) { _currPlayer = &_players[name]; }
+
     bool confirmCurrentPlayerSelection();
 
     Arcade::Player& getCurrentPlayer() noexcept;
@@ -55,7 +59,6 @@ class Core {
     int game_loop();
     void loadLibrariesFromDirectory(std::string_view directory);
     void selectInitialLibraries(std::string_view preferredDisplayPath, std::string_view preferredGamePath);
-    void startPlayerInput();
     Arcade::Player* findPlayerByName(std::string_view name) const noexcept;
     void queueGameSwitch(Arcade::IGame* nextGame);
     void applyPendingGameSwitch();
@@ -67,18 +70,20 @@ class Core {
     bool handleGlobalEvent(Arcade::Events::Event evt);
     bool pollCoreEvents();
 
+    void updatePlayerScore();
+
     std::span<char *> _args;
     Arcade::IDisplay* _currDisplay = nullptr;
     Arcade::IGame* _currGame = nullptr;
     Arcade::IGame* _pendingGame = nullptr;
-    Arcade::Player* _currPlayer = nullptr;
+    CorePlayer* _currPlayer = nullptr;
 
     std::vector<SharedLibrary> _displayHandles;
     std::vector<SharedLibrary> _gameHandles;
 
     std::vector<std::unique_ptr<Arcade::IDisplay>> _displays;
     std::vector<std::unique_ptr<Arcade::IGame>> _games;
-    std::vector<std::unique_ptr<Arcade::Player>> _players;
+    PlayerContainer _players;
     std::vector<std::string> _displayPaths;
     std::vector<std::string> _gamePaths;
     Arcade::Player _inputPlayer{""};
