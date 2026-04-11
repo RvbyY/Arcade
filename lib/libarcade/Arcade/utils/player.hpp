@@ -26,7 +26,6 @@ namespace Arcade {
         std::string name;
         std::uint64_t score;
 
-        constexpr Player(std::string&& name) : name(std::move(name)), score(0) {}
         Player(std::string_view name) : name(name), score(0) {}
 
         constexpr bool operator==(const Player& other) const { return name == other.name; }

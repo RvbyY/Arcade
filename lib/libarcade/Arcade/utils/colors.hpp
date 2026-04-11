@@ -114,17 +114,17 @@ namespace Arcade {
      * of Arcade's "simple" colors.
      */
     inline namespace Colors {
-        static constexpr Color BLACK  = 0x000000;
+        inline constexpr Color BLACK  = 0x000000;
 
-        static constexpr Color RED    = 0xff0000;
-        static constexpr Color GREEN  = 0x00ff00;
-        static constexpr Color BLUE   = 0x0000ff;
+        inline constexpr Color RED    = 0xff0000;
+        inline constexpr Color GREEN  = 0x00ff00;
+        inline constexpr Color BLUE   = 0x0000ff;
 
-        static constexpr Color PURPLE = 0xff00ff;
-        static constexpr Color YELLOW = 0xffff00;
-        static constexpr Color CYAN   = 0x00ffff;
+        inline constexpr Color PURPLE = 0xff00ff;
+        inline constexpr Color YELLOW = 0xffff00;
+        inline constexpr Color CYAN   = 0x00ffff;
 
-        static constexpr Color WHITE  = 0xffffff;
+        inline constexpr Color WHITE  = 0xffffff;
     }
 
     constexpr Color Color::simple() const

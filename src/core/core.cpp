@@ -8,47 +8,249 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <stdexcept>
 #include "core/core.hpp"
 
-int core(int argc, char* argv[])
+Core::Core(int argc, char** argv)
+    : _args(argv, argc)
+    , _userInputMenu(*this)
+    , _selectMenu(*this)
+    , _debugOverlay()
+    , _selectedDisplayIndex(0)
+    , _selectedGameIndex(0)
 {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <path_to_graphic_lib> [path_to_game_lib]" << std::endl;
-        return 1;
+}
+
+static void printUsage()
+{
+    std::cout << "Usage: ./arcade <path_to_graphic_lib> [path_to_game_lib]" << std::endl << std::endl;
+    std::cout << "The action keys are as follows:" << std::endl << std::endl;
+
+    std::cout << "*In-game*" << std::endl;
+    std::cout << "  ESC       -> Quit the game" << std::endl;
+    std::cout << "  M         -> Return to the menu" << std::endl;
+    std::cout << "  G         -> Switch to the next game" << std::endl;
+    std::cout << "  R         -> Restart the current game" << std::endl;
+    std::cout << "  F1...F12  -> Switch graphical library" << std::endl << std::endl;
+
+    std::cout << "*Select Menu*" << std::endl;
+    std::cout << "  ESC       -> Go back to the username input menu" << std::endl;
+    std::cout << "  ENTER     -> Start the selected game" << std::endl << std::endl;
+
+    std::cout << "*Username Input Menu*" << std::endl;
+    std::cout << "  ESC       -> Exit the program" << std::endl;
+    std::cout << "  ENTER     -> Confirm username and load the Selection Menu (requires at least one character)" << std::endl << std::endl;
+
+    std::cout << "*Utils*" << std::endl;
+    std::cout << "  P         -> Toggle debug overlay (shows current libraries)" << std::endl;
+}
+
+int Core::run()
+{
+    if (_args.size() < 2) {
+        throw std::runtime_error("Usage: ./arcade <path_to_graphic_lib> [path_to_game_lib]");
     }
+    if (std::string_view(_args[1]) == "-h" || std::string_view(_args[1]) == "--help") {
+        printUsage();
+        return 0;
+    }
+    const std::string_view preferredDisplayPath = _args[1];
+    const std::string_view preferredGamePath = _args.size() >= 3 ? std::string_view(_args[2]) : std::string_view{};
 
-    const char* displayPath = argv[1];
-    const char* gamePath = argc >= 3 ? argv[2] : "lib/arcade_snake.so"; // default to snake for testing
+    loadLibrariesFromDirectory("lib");
+    if (_displays.empty()) {
+        throw std::runtime_error("No display library found in lib/.");
+    }
+    if (_games.empty()) {
+        throw std::runtime_error("No game library found in lib/.");
+    }
+    selectInitialLibraries(preferredDisplayPath, preferredGamePath);
 
-    SharedLibrary displayHandle = load_library_or_throw(displayPath);
-    Arcade::DisplayEntryPointFnc createDisplay = load_display_entrypoint_or_throw(displayHandle.get());
+    startPlayerInput();
 
-    SharedLibrary gameHandle = load_library_or_throw(gamePath);
-    Arcade::GameEntryPointFnc createGame = load_game_entrypoint_or_throw(gameHandle.get());
-
-    std::unique_ptr<Arcade::IDisplay> display(createDisplay());
-    std::unique_ptr<Arcade::IGame> game(createGame());
-    Arcade::Player player(std::string("tester"));
+    _currDisplay = _displays[_selectedDisplayIndex].get();
+    _currGame = &_userInputMenu;
 
     bool displayOpened = false;
     bool gameInitialized = false;
+    int status = 0;
     try {
-        display->open();
+        _currDisplay->open();
         displayOpened = true;
-        game->init();
+        _currGame->init();
         gameInitialized = true;
-        game_loop(*display, *game, player);
+        status = game_loop();
     } catch (...) {
         if (gameInitialized) {
-            game->destroy();
+            _currGame->destroy();
         }
         if (displayOpened) {
-            display->close();
+            _currDisplay->close();
         }
         throw;
     }
 
-    game->destroy();
-    display->close();
-    return 0;
+    _currGame->destroy();
+    _currDisplay->close();
+    return status;
+}
+
+void Core::switchToUserInputMenu()
+{
+    startPlayerInput();
+    queueGameSwitch(&_userInputMenu);
+}
+
+void Core::switchToSelectMenu()
+{
+    queueGameSwitch(&_selectMenu);
+}
+
+void Core::switchToLoadedGame()
+{
+    if (!_games.empty()) {
+        queueGameSwitch(_games[_selectedGameIndex].get());
+    }
+}
+
+void Core::cycleToNextGame()
+{
+    if (_games.empty()) {
+        return;
+    }
+    _selectedGameIndex = (_selectedGameIndex + 1) % _games.size();
+    switchToLoadedGame();
+}
+
+bool Core::selectDisplay(std::size_t index)
+{
+    if (index >= _displays.size()) {
+        return false;
+    }
+
+    if (_currDisplay == nullptr) {
+        _selectedDisplayIndex = index;
+        _currDisplay = _displays[index].get();
+        return true;
+    }
+
+    if (_selectedDisplayIndex == index) {
+        return true;
+    }
+
+    const bool wasOpen = _currDisplay->isOpen();
+    if (wasOpen) {
+        _currDisplay->close();
+    }
+
+    Arcade::DisplayEntryPointFnc createDisplay = loadDisplayEntryPointOrThrow(_displayHandles[index].get());
+    _displays[index].reset(createDisplay());
+    _selectedDisplayIndex = index;
+    _currDisplay = _displays[index].get();
+
+    if (wasOpen) {
+        _currDisplay->open();
+    }
+    return true;
+}
+
+bool Core::selectGame(std::size_t index) noexcept
+{
+    if (index >= _games.size()) {
+        return false;
+    }
+    _selectedGameIndex = index;
+    return true;
+}
+
+bool Core::confirmCurrentPlayerSelection()
+{
+    if (_currPlayer == nullptr || _currPlayer->name.empty()) {
+        return false;
+    }
+
+    Arcade::Player* existingPlayer = findPlayerByName(_currPlayer->name);
+
+    if (existingPlayer != nullptr) {
+        _currPlayer = existingPlayer;
+    } else {
+        _players.push_back(std::make_unique<Arcade::Player>(_currPlayer->name));
+        _currPlayer = _players.back().get();
+    }
+    return true;
+}
+
+Arcade::Player& Core::getCurrentPlayer() noexcept
+{
+    return *_currPlayer;
+}
+
+const Arcade::Player& Core::getCurrentPlayer() const noexcept
+{
+    return *_currPlayer;
+}
+
+std::size_t Core::displayCount() const noexcept
+{
+    return _displays.size();
+}
+
+std::size_t Core::gameCount() const noexcept
+{
+    return _games.size();
+}
+
+std::size_t Core::getSelectedDisplayIndex() const noexcept
+{
+    return _selectedDisplayIndex;
+}
+
+std::size_t Core::getSelectedGameIndex() const noexcept
+{
+    return _selectedGameIndex;
+}
+
+std::string_view Core::displayName(std::size_t index) const noexcept
+{
+    if (index >= _displays.size()) {
+        return {};
+    }
+    return _displays[index]->libraryName();
+}
+
+std::string_view Core::gameTitle(std::size_t index) const noexcept
+{
+    if (index >= _games.size()) {
+        return {};
+    }
+    return _games[index]->gameTitle();
+}
+
+bool Core::isLoadedGameActive() const noexcept
+{
+    return _currGame != nullptr && _currGame != &_userInputMenu && _currGame != &_selectMenu;
+}
+
+void Core::startPlayerInput()
+{
+    _inputPlayer.name.clear();
+    _inputPlayer.score = 0;
+    _currPlayer = &_inputPlayer;
+}
+
+Arcade::Player* Core::findPlayerByName(std::string_view name) const noexcept
+{
+    for (const auto& player : _players) {
+        if (player->name == name) {
+            return player.get();
+        }
+    }
+    return nullptr;
+}
+
+void Core::queueGameSwitch(Arcade::IGame* nextGame)
+{
+    if (nextGame != nullptr) {
+        _pendingGame = nextGame;
+    }
 }

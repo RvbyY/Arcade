@@ -19,6 +19,10 @@ add_executable(arcade
     src/core/core.cpp
     src/core/game_loop.cpp
     src/core/load_libraries.cpp
+    src/menu/SelectMenu.cpp
+    src/menu/UserInputMenu.cpp
+    src/menu/UsernameSelection.cpp
+    src/core/overlays/debugOverlay.cpp
 )
 target_include_directories(arcade PRIVATE include lib/libarcade)
 
@@ -34,28 +38,41 @@ endmacro()
 
 # ─── Arcade lib ───────────────────────────────────────────────────────────────
 
-include(ExternalProject)
 set(LIBARCADE_SRC_DIR ${CMAKE_SOURCE_DIR}/lib/libarcade)
 set(LIBARCADE_MAKEFILE ${LIBARCADE_SRC_DIR}/Makefile)
+option(ARCADE_FORCE_LIBARCADE_CLONE "Force re-cloning lib/libarcade from the remote repository" OFF)
 
-if (EXISTS "${LIBARCADE_MAKEFILE}")
-    set(LIBARCADE_BUILD_CMD ${CMAKE_MAKE_PROGRAM} no-repo)
+if (ARCADE_FORCE_LIBARCADE_CLONE)
+    include(ExternalProject)
+    ExternalProject_Add(libarcade
+        GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
+        GIT_TAG main
+        SOURCE_DIR ${LIBARCADE_SRC_DIR}
+        UPDATE_COMMAND ""
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} no-repo
+        INSTALL_COMMAND ""
+        BUILD_IN_SOURCE 1
+    )
+elseif (EXISTS "${LIBARCADE_SRC_DIR}")
+    if (EXISTS "${LIBARCADE_MAKEFILE}")
+        add_custom_target(libarcade
+            COMMAND ${CMAKE_MAKE_PROGRAM} no-repo
+            WORKING_DIRECTORY ${LIBARCADE_SRC_DIR}
+            COMMENT "Cleaning existing lib/libarcade checkout"
+        )
+    else()
+        add_custom_target(libarcade
+            COMMAND ${CMAKE_COMMAND} -E echo "Using existing lib/libarcade directory"
+        )
+    endif()
 else()
-    set(LIBARCADE_BUILD_CMD "")
+    message(FATAL_ERROR
+        "Missing ${LIBARCADE_SRC_DIR}. Provide the directory locally or configure with "
+        "-DARCADE_FORCE_LIBARCADE_CLONE=ON to clone it."
+    )
 endif()
 
-
-ExternalProject_Add(libarcade
-    GIT_REPOSITORY git@github.com:Bard-Gaming/libarcade.git
-    GIT_TAG main
-    SOURCE_DIR ${LIBARCADE_SRC_DIR}
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ""
-    # BUILD_COMMAND ${LIBARCADE_BUILD_CMD}
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    BUILD_IN_SOURCE 1
-)
 add_dependencies(arcade libarcade)
 
 target_include_directories(arcade PUBLIC lib/libarcade)
@@ -64,15 +81,21 @@ target_link_libraries(arcade PUBLIC ncurses)
 # ─── Graphics libraries ───────────────────────────────────────────────────────
 add_arcade_lib(arcade_ncurses
     src/graphics/ncurses/Ncurses.cpp
-    src/graphics/KeySwitch.cpp
+    src/graphics/ncurses/NcursesKeySwitch.cpp
 )
 target_link_libraries(arcade_ncurses PRIVATE -lncurses)
 
 add_arcade_lib(arcade_sdl2
     src/graphics/SDL2/SDL2.cpp
-    src/graphics/KeySwitch.cpp
+    src/graphics/SDL2/SDL2KeySwitch.cpp
 )
 target_link_libraries(arcade_sdl2 PRIVATE SDL2 SDL2_ttf)
+
+add_arcade_lib(arcade_sfml
+    src/graphics/SFML/SfmlGraphic.cpp
+    src/graphics/SFML/SfmlKeySwitch.cpp
+)
+target_link_libraries(arcade_sfml PRIVATE sfml-graphics sfml-window sfml-system)
 
 
 # ─── Game libraries ───────────────────────────────────────────────────────────
