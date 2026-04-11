@@ -19,6 +19,7 @@ PacMan::PacMan()
     , _nbPacGun(0)
     , _accumulator(0)
     , _gameOver(false)
+    , _gameWon(false)
     , _superPac(false)
     , _superPacTimer(0)
     , _ghostFrozenUntil{0ns, 0ns, 0ns, 0ns}
@@ -87,14 +88,15 @@ bool PacMan::spawnPacGun()
     return true;
 }
 
-void PacMan::eatPacGun()
+void PacMan::eatPacGun(Player& player)
 {
     _nbPacGun--;
     _superPac = true;
-    PacMan::spawnPacGun();
+    // PacMan::spawnPacGun();
+    player.score += 10;
 }
 
-void PacMan::drawMap(int randomValue, std::uniform_int_distribution<int> dist)
+void PacMan::createMap(int randomValue, std::uniform_int_distribution<int> dist)
 {
     int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
     int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
@@ -139,7 +141,7 @@ void PacMan::init()
     _superPacTimer = 0ns;
     for (int i = 0; i < 4; i++)
         _ghostFrozenUntil[i] = 0ns;
-    drawMap(randomValue, dist);
+    createMap(randomValue, dist);
     PacMan::setPacmanPosition();
     PacMan::setGhostsPositions();
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -148,8 +150,8 @@ void PacMan::init()
             Tools::Vec2 pos = {x, y};
             Tools::CellType cellType = _grid.getPosition(pos);
             if (_grid.getPosition(pos) == Tools::EMPTY && randomValue < 1) {
-                _pacGuns.insert(pos);
-                _nbPacGun++;
+                if (spawnPacGun());
+                    _pacGuns.insert(pos);
             }
         }
     }
@@ -174,17 +176,17 @@ void PacMan::handleEvent(Events::Event evt, IDisplay&)
 {
     namespace Dir = Tools::Direction;
     switch (evt) {
-        case ARC_ARROW_UP: return _dir = _dir != Dir::DOWN ? Dir::UP : _dir;
-        case ARC_ARROW_DOWN: return _dir = _dir != Dir::UP ? Dir::DOWN : _dir;
-        case ARC_ARROW_LEFT: return _dir = _dir != Dir::RIGHT ? Dir::LEFT : _dir;
-        case ARC_ARROW_RIGHT: return _dir = _dir != Dir::LEFT ? Dir::RIGHT : _dir;
+        case ARC_ARROW_UP: return _dir = Dir::UP;
+        case ARC_ARROW_DOWN: return _dir = Dir::DOWN;
+        case ARC_ARROW_LEFT: return _dir = Dir::LEFT;
+        case ARC_ARROW_RIGHT: return _dir = Dir::RIGHT;
         case ARC_KEY_R : return restart();
         default:
             return;
     }
 }
 
-void PacMan::eatGhosts()
+void PacMan::eatGhosts(Player& player)
 {
     if (_superPac) {
         int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
@@ -197,13 +199,14 @@ void PacMan::eatGhosts()
                 _ghostFrozenUntil[i] = _accumulator + 2s;
             }
         }
+        player.score += 20;
     }
 }
 
-void PacMan::superPacActions()
+void PacMan::superPacActions(Player& player)
 {
     _superPacTimer = 0ns;
-    eatGhosts();
+    eatGhosts(player);
 }
 
 void PacMan::moveGhosts(int ghostIndex)
@@ -234,7 +237,7 @@ void PacMan::moveGhosts(int ghostIndex)
 
 void PacMan::update(std::chrono::nanoseconds dt, Player& player)
 {
-    if (_gameOver)
+    if (_gameOver || _gameWon)
         return;
     _superPacTimer += dt;
     _accumulator += dt;
@@ -246,7 +249,7 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
     for (int i = 0; i < 4; i++) {
         if (_pacman == _ghosts[i]) {
             if (_superPac) {
-                eatGhosts();
+                eatGhosts(player);
             } else {
                 _gameOver = true;
             }
@@ -262,11 +265,13 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
     }
     if (_pacGuns.count(nextCell) > 0) {
         _pacGuns.erase(nextCell);
-        eatPacGun();
-        superPacActions();
+        eatPacGun(player);
+        superPacActions(player);
     }
     if (_superPac && _superPacTimer > 10s)
         _superPac = false;
+    if (_nbPacGun == 0)
+        _gameWon = true;
 }
 
 void PacMan::render(IDisplay& display)
@@ -285,6 +290,13 @@ void PacMan::render(IDisplay& display)
         display.draw(Arcade::Shapes::Point(pacGun.x + 1, pacGun.y + 1, Arcade::Colors::WHITE));
     if (_gameOver) {
         Arcade::Text endDialog("GAME OVER ! PRESS \'R\' to restart the game!");
+
+        endDialog.x = (MAP_WIDTH - endDialog.content.size()) / 2;
+        endDialog.y = MAP_HEIGHT / 2;
+        display.draw(endDialog);
+    }
+    if (_gameWon) {
+        Arcade::Text endDialog("CONGRATULATIONS ! YOU WON THE GAME ! PRESS \'R\' to restart the game!");
 
         endDialog.x = (MAP_WIDTH - endDialog.content.size()) / 2;
         endDialog.y = MAP_HEIGHT / 2;

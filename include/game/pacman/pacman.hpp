@@ -38,17 +38,17 @@ namespace Arcade {
             static constexpr int GATE_WIDTH = 2;
             static constexpr int GATE_BOTTOM_X = GHOST_ZONE_CENTER_X;
             static constexpr int GATE_LEFT_Y = GHOST_ZONE_CENTER_Y;
-            static constexpr int TARGET_GUN = 2;
+            static constexpr int TARGET_GUN = 4;
             static constexpr int GUN_MAX_ATTEMPs = 50;
             static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
 
             // helpers
             bool spawnPacGun();
-            void eatPacGun();
-            void eatGhosts();
-            void superPacActions();
+            void eatPacGun(Player& player);
+            void eatGhosts(Player& player);
+            void superPacActions(Player& player);
             void moveGhosts(int);
-            void drawMap(int, std::uniform_int_distribution<int>);
+            void createMap(int, std::uniform_int_distribution<int>);
             std::optional<Tools::Vec2> getRandomEmptyCoord();
             Arcade::Color getCellColor(Tools::CellType type);
 
@@ -62,6 +62,7 @@ namespace Arcade {
             Tools::Vec2 _dir;
             std::chrono::nanoseconds _accumulator;
             bool _gameOver;
+            bool _gameWon;
             bool _superPac;
             std::chrono::nanoseconds _superPacTimer;
             std::array<std::chrono::nanoseconds, 4> _ghostFrozenUntil;
