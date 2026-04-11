@@ -98,6 +98,8 @@ void PacMan::init()
 {
     std::uniform_int_distribution<int> dist(0, 100);
     int randomValue;
+    int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
+    int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
 
     _grid.reset(Tools::EMPTY);
     _pacGuns.clear();
@@ -115,6 +117,32 @@ void PacMan::init()
         else
             _grid.cells[i] = Tools::EMPTY;
     }
+    
+    // Create ghost zone walls with gate at bottom
+    int gateX = offsetX + GHOST_ZONE_WIDTH / 2;
+    int gateY = offsetY + GHOST_ZONE_HEIGHT;
+    
+    // Top wall
+    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
+        _grid.setPosition({x, offsetY}, Tools::WALL);
+    }
+    // Left wall
+    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
+        _grid.setPosition({offsetX, y}, Tools::WALL);
+    }
+    // Right wall
+    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
+        _grid.setPosition({offsetX + GHOST_ZONE_WIDTH - 1, y}, Tools::WALL);
+    }
+    // Bottom wall with gate opening (2 cells wide)
+    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
+        if (x == gateX || x == gateX + 1) {
+            _grid.setPosition({x, gateY}, Tools::GATE);
+        } else {
+            _grid.setPosition({x, gateY}, Tools::WALL);
+        }
+    }
+    
     PacMan::setPacmanPosition();
     PacMan::setGhostsPositions();
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -230,7 +258,7 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
             PacMan::moveGhosts(i);
     }
 
-    if (_grid.getPosition(nextCell) != Tools::WALL) {
+    if (_grid.getPosition(nextCell) != Tools::WALL && _grid.getPosition(nextCell) != Tools::GATE) {
         _grid.setPosition(_pacman, Tools::EMPTY);
         _pacman = nextCell;
         _grid.setPosition(_pacman, Tools::HEAD);
@@ -265,8 +293,8 @@ void PacMan::render(IDisplay& display)
         endDialog.y = MAP_HEIGHT / 2;
         display.draw(endDialog);
     }
-    display.draw(Arcade::Shapes::Rectangle(offsetX + 1, offsetY + 1, GHOST_ZONE_WIDTH + 1, 1, Arcade::Colors::CYAN));
-    display.draw(Arcade::Shapes::Rectangle(offsetX + 1, offsetY + 1, 1, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::CYAN));
+    display.draw(Arcade::Shapes::Rectangle(offsetX , offsetY + 1, GHOST_ZONE_WIDTH + 1, 1, Arcade::Colors::CYAN));
+    display.draw(Arcade::Shapes::Rectangle(offsetX , offsetY + 1, 1, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::CYAN));
     display.draw(Arcade::Shapes::Rectangle(offsetX + 1, offsetY + GHOST_ZONE_HEIGHT + 1, GHOST_ZONE_WIDTH + 1, 0, Arcade::Colors::CYAN));
     display.draw(Arcade::Shapes::Rectangle(offsetX + GHOST_ZONE_WIDTH + 1, offsetY + 1, 0, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::CYAN));
     display.draw(Arcade::Shapes::Rectangle(0, 0, MAP_WIDTH + 2, 0, Arcade::Colors::BLUE));
@@ -282,6 +310,7 @@ Color PacMan::getCellColor(Tools::CellType type)
         case Tools::GHOST: return _superPac ? Colors::GREEN : Colors::RED;
         case Tools::HEAD: return _superPac ? Colors::PURPLE : Colors::YELLOW;
         case Tools::WALL: return Colors::BLUE;
+        case Tools::GATE: return Colors::PURPLE;
         case Tools::PACGUN: return Colors::YELLOW;
         case Tools::EMPTY: return Colors::BLACK;
         default: return Colors::BLACK;

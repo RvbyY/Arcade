@@ -35,6 +35,9 @@ namespace Arcade {
             static constexpr int GHOST_ZONE_HEIGHT = 4;
             static constexpr int GHOST_ZONE_CENTER_X = MAP_WIDTH / 2;
             static constexpr int GHOST_ZONE_CENTER_Y = MAP_HEIGHT / 2;
+            static constexpr int GATE_WIDTH = 2;
+            static constexpr int GATE_BOTTOM_X = GHOST_ZONE_CENTER_X;
+            static constexpr int GATE_LEFT_Y = GHOST_ZONE_CENTER_Y;
             static constexpr int TARGET_GUN = 2;
             static constexpr int GUN_MAX_ATTEMPs = 50;
             static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);

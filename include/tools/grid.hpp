@@ -30,7 +30,8 @@ namespace Tools
         BODY,
         HEAD,
         PACGUN,
-        GHOST
+        GHOST,
+        GATE
     };
 
     struct Vec2 {
