@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <vector>
 #include "core/core.hpp"
+#include <iostream>
 
 namespace {
 std::optional<Arcade::DisplayEntryPointFnc> tryLoadDisplayEntryPoint(void* displayHandle)
@@ -126,6 +127,7 @@ void Core::loadLibrariesFromDirectory(std::string_view directory)
                 }
             }
         } catch (const std::exception&) {
+            std::cerr << "Lib failed to load " << libraryPath << std::endl;
             // ajouter un message de warning pour indiquer que la lib en question a pas load
             continue;
         }
