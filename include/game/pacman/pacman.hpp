@@ -1,3 +1,4 @@
+#include <array>
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -29,8 +30,10 @@ namespace Arcade {
             static constexpr Arcade::Color YELLOW = 0xffce1b;
             static constexpr Arcade::Color PURPLE = 0x7f00ff;
             static constexpr Arcade::Color BLUE = 0x111184;
-            static constexpr int MAP_WIDTH = 60;
-            static constexpr int MAP_HEIGHT = 30;
+            static constexpr Arcade::Color ORANGE = 0xff9900;
+            static constexpr int MAP_WIDTH = 30;
+            static constexpr int MAP_HEIGHT = 15;
+            static constexpr int NB_CELLS = MAP_WIDTH * MAP_HEIGHT;
             static constexpr int GHOST_ZONE_WIDTH = 5;
             static constexpr int GHOST_ZONE_HEIGHT = 4;
             static constexpr int GHOST_ZONE_CENTER_X = MAP_WIDTH / 2;
@@ -40,16 +43,16 @@ namespace Arcade {
             static constexpr int GATE_LEFT_Y = GHOST_ZONE_CENTER_Y;
             static constexpr int TARGET_GUN = 4;
             static constexpr int GUN_MAX_ATTEMPs = 50;
-            static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
+            std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
 
             // helpers
             bool spawnPacGun();
             void eatPacGun(Player& player);
-            void eatGhosts(Player& player);
-            void superPacActions(Player& player);
+            void eatGum(Tools::Vec2 nextCell);
             void moveGhosts(int);
             void createMap(int, std::uniform_int_distribution<int>);
-            std::optional<Tools::Vec2> getRandomEmptyCoord();
+            std::optional<Tools::Vec2> getRandomGumCoord();
+            void renderEndDialog(IDisplay& display, std::string_view title, Arcade::Color bannerColor);
             Arcade::Color getCellColor(Tools::CellType type);
 
             // state
@@ -64,6 +67,7 @@ namespace Arcade {
             bool _gameOver;
             bool _gameWon;
             bool _superPac;
+            size_t _gameScore;
             std::chrono::nanoseconds _superPacTimer;
             std::array<std::chrono::nanoseconds, 4> _ghostFrozenUntil;
             std::unordered_set<Tools::Vec2, Tools::Vec2Hash> _pacGuns;

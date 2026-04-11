@@ -163,6 +163,11 @@ void Snake::render(IDisplay& display)
     display.draw(Arcade::Shapes::Rectangle(0, MAP_HEIGHT + 1, MAP_WIDTH + 2, 0, Arcade::Colors::WHITE));
     display.draw(Arcade::Shapes::Rectangle(MAP_WIDTH + 1, 0, 0, MAP_HEIGHT + 2, Arcade::Colors::WHITE));
 
+    Arcade::Text playerScoreText("Score: ");
+    playerScoreText.content += std::to_string(_gameScore);
+    playerScoreText.x = MAP_WIDTH + playerScoreText.content.length();
+    playerScoreText.y = MAP_HEIGHT;
+    display.draw(playerScoreText);
 }
 
 } // namespace Arcade

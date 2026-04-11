@@ -111,7 +111,7 @@ void SDL2Graphic::draw(const Arcade::Text& text)
 {
     if (!_font) return;
     SDL_Color color = { text.color.red, text.color.green, text.color.blue, text.color.alpha };
-    SDL_Surface* surface = TTF_RenderText_Solid(_font, text.content.c_str(), color);
+    SDL_Surface* surface = TTF_RenderText_Blended(_font, text.content.c_str(), color);
     if (!surface) return;
     SDL_Texture* texture = SDL_CreateTextureFromSurface(_renderer, surface);
     std::pair<int, int> convertedCoords = convert_coords(text.x, text.y);
