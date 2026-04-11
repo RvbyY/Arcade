@@ -52,6 +52,7 @@ namespace Arcade {
             void moveGhosts(int);
             void createMap(int, std::uniform_int_distribution<int>);
             std::optional<Tools::Vec2> getRandomGumCoord();
+            void renderEndDialog(IDisplay& display, std::string_view title, Arcade::Color bannerColor);
             Arcade::Color getCellColor(Tools::CellType type);
 
             // state

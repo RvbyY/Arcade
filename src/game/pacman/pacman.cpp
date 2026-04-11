@@ -257,23 +257,6 @@ void PacMan::render(IDisplay& display)
 {
     int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
     int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
-    auto drawEndDialog = [&](std::string_view title, Arcade::Color bannerColor) {
-        constexpr std::string_view restartLabel = "PRESS R TO RESTART";
-        const Arcade::Coordinate dialogWidth = 26;
-        const Arcade::Coordinate dialogHeight = 4;
-        const Arcade::Coordinate dialogX = (MAP_WIDTH + 2 - dialogWidth) / 2;
-        const Arcade::Coordinate dialogY = (MAP_HEIGHT + 2 - dialogHeight) / 2;
-        const Arcade::Coordinate titleX = dialogX + (dialogWidth - static_cast<Arcade::Coordinate>(title.size())) / 2;
-        const Arcade::Coordinate restartX = dialogX + (dialogWidth - static_cast<Arcade::Coordinate>(restartLabel.size())) / 2;
-
-        display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY, dialogWidth, dialogHeight, Arcade::Colors::BLACK));
-        display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY, dialogWidth, 0, bannerColor));
-        display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY + dialogHeight, dialogWidth, 0, bannerColor));
-        display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY, 0, dialogHeight, bannerColor));
-        display.draw(Arcade::Shapes::Rectangle(dialogX + dialogWidth, dialogY, 0, dialogHeight, bannerColor));
-        display.draw(Arcade::Text(title, titleX, dialogY + 1, Arcade::Colors::WHITE));
-        display.draw(Arcade::Text(restartLabel, restartX, dialogY + 2, bannerColor));
-    };
 
     for (long x = 0; x < MAP_WIDTH + 2; x++)
         for (long y = 0; y < MAP_HEIGHT + 2; y++)
@@ -295,9 +278,28 @@ void PacMan::render(IDisplay& display)
     display.draw(Arcade::Shapes::Rectangle(0, MAP_HEIGHT + 1, MAP_WIDTH + 2, 0, Arcade::Colors::BLUE));
     display.draw(Arcade::Shapes::Rectangle(MAP_WIDTH + 1, 0, 0, MAP_HEIGHT + 2, Arcade::Colors::BLUE));
     if (_gameOver)
-        drawEndDialog("GAME OVER", Arcade::Colors::RED);
+        renderEndDialog(display, "GAME OVER", Arcade::Colors::RED);
     else if (_gameWon)
-        drawEndDialog("YOU WON", Arcade::Colors::GREEN);
+        renderEndDialog(display, "YOU WON", Arcade::Colors::GREEN);
+}
+
+void PacMan::renderEndDialog(IDisplay& display, std::string_view title, Arcade::Color bannerColor)
+{
+    constexpr std::string_view restartLabel = "PRESS R TO RESTART";
+    const Arcade::Coordinate dialogWidth = 26;
+    const Arcade::Coordinate dialogHeight = 4;
+    const Arcade::Coordinate dialogX = (MAP_WIDTH + 2 - dialogWidth) / 2;
+    const Arcade::Coordinate dialogY = (MAP_HEIGHT + 2 - dialogHeight) / 2;
+    const Arcade::Coordinate titleX = dialogX + (dialogWidth - static_cast<Arcade::Coordinate>(title.size())) / 2;
+    const Arcade::Coordinate restartX = dialogX + (dialogWidth - static_cast<Arcade::Coordinate>(restartLabel.size())) / 2;
+
+    display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY, dialogWidth, dialogHeight, Arcade::Colors::BLACK));
+    display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY, dialogWidth, 0, bannerColor));
+    display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY + dialogHeight, dialogWidth, 0, bannerColor));
+    display.draw(Arcade::Shapes::Rectangle(dialogX, dialogY, 0, dialogHeight, bannerColor));
+    display.draw(Arcade::Shapes::Rectangle(dialogX + dialogWidth, dialogY, 0, dialogHeight, bannerColor));
+    display.draw(Arcade::Text(title, titleX, dialogY + 1, Arcade::Colors::WHITE));
+    display.draw(Arcade::Text(restartLabel, restartX, dialogY + 2, bannerColor));
 }
 
 Color PacMan::getCellColor(Tools::CellType type)
