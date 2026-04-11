@@ -147,7 +147,7 @@ void PacMan::init()
             randomValue = dist(_rng);
             Tools::Vec2 pos = {x, y};
             Tools::CellType cellType = _grid.getPosition(pos);
-            if (_grid.getPosition(pos) == Tools::EMPTY && randomValue < 2) {
+            if (_grid.getPosition(pos) == Tools::EMPTY && randomValue < 1) {
                 _pacGuns.insert(pos);
                 _nbPacGun++;
             }
@@ -194,7 +194,7 @@ void PacMan::eatGhosts()
                 _grid.setPosition(_ghosts[i], Tools::EMPTY);
                 _ghosts[i] = {offsetX + 2 + (i % 2), offsetY + 2 + (i / 2)};
                 _grid.setPosition(_ghosts[i], Tools::GHOST);
-                _ghostFrozenUntil[i] = _accumulator + 10s;
+                _ghostFrozenUntil[i] = _accumulator + 2s;
             }
         }
     }
@@ -251,7 +251,7 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
                 _gameOver = true;
             }
         }
-        if (_ghostFrozenUntil[i] <= _accumulator)
+        if (_ghostFrozenUntil[i] < _accumulator)
             PacMan::moveGhosts(i);
     }
 
