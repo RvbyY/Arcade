@@ -18,6 +18,7 @@ PacMan::PacMan()
     , _grid(MAP_WIDTH, MAP_HEIGHT, Tools::EMPTY)
     , _nbPacGun(0)
     , _accumulator(0)
+    , _gameScore(0)
     , _gameOver(false)
     , _gameWon(false)
     , _superPac(false)
@@ -28,14 +29,14 @@ PacMan::PacMan()
     _ghosts.resize(4, {0, 0});
 }
 
-std::optional<Tools::Vec2> PacMan::getRandomEmptyCoord()
+std::optional<Tools::Vec2> PacMan::getRandomGumCoord()
 {
     std::uniform_int_distribution<Arcade::Coordinate> distX(0, MAP_WIDTH - 1);
     std::uniform_int_distribution<Arcade::Coordinate> distY(0, MAP_HEIGHT - 1);
     Tools::Vec2 coords = {distX(_rng), distY(_rng)};
 
     for (size_t i = 0; i < GUN_MAX_ATTEMPs; i++) {
-        if (_grid.getPosition(coords) == Tools::EMPTY)
+        if (_grid.getPosition(coords) == Tools::GUMS)
             return coords;
         coords = {distX(_rng), distY(_rng)};
     }
@@ -44,34 +45,22 @@ std::optional<Tools::Vec2> PacMan::getRandomEmptyCoord()
 
 void PacMan::setPacmanPosition()
 {
-    int z = 0;
-
-    Tools::Vec2 coords = {0, 0};
-    while (_grid.getPosition(coords) == Tools::WALL) {
-        if (coords.x < MAP_WIDTH / 2)
-            coords.x++;
-        else if (z % 5 == 0)
-            coords.y++;
-        z++;
+    auto coords = getRandomGumCoord();
+    if (coords) {
+        _pacman = *coords;
+    } else {
+        _pacman = {MAP_WIDTH / 2, MAP_HEIGHT / 2};
     }
-    _pacman = coords;
-    _grid.setPosition(coords, Tools::HEAD);
     _dir = Tools::Direction::RIGHT;
 }
 
 void PacMan::setGhostsPositions()
 {
-    Tools::Vec2 coords;
     int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
     int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
 
     for (int i = 0; i < 4; i++) {
-        if (i == 0 || i % 2 == 0)
-            coords = {offsetX + GHOST_ZONE_WIDTH - 1 - i, offsetY + GHOST_ZONE_HEIGHT - 1};
-        else
-            coords = {offsetX + GHOST_ZONE_WIDTH - 1, offsetY + GHOST_ZONE_HEIGHT - 1 - i};
-        _ghosts[i] = coords;
-        _grid.setPosition(coords, Tools::GHOST);
+        _ghosts[i] = {offsetX + 2 + (i % 2), offsetY + 2 + (i / 2)};
     }
 }
 
@@ -79,7 +68,7 @@ bool PacMan::spawnPacGun()
 {
     if (_nbPacGun >= TARGET_GUN)
         return false;
-    auto pacGunCoords = getRandomEmptyCoord();
+    auto pacGunCoords = getRandomGumCoord();
 
     if (!pacGunCoords)
         return false;
@@ -92,8 +81,7 @@ void PacMan::eatPacGun(Player& player)
 {
     _nbPacGun--;
     _superPac = true;
-    // PacMan::spawnPacGun();
-    player.score += 10;
+    _gameScore += 10;
 }
 
 void PacMan::createMap(int randomValue, std::uniform_int_distribution<int> dist)
@@ -101,29 +89,26 @@ void PacMan::createMap(int randomValue, std::uniform_int_distribution<int> dist)
     int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
     int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
     int gateX = offsetX + GHOST_ZONE_WIDTH / 2;
-    int gateY = offsetY + GHOST_ZONE_HEIGHT;
+    int gateY = offsetY;
 
-    for (unsigned int i = 0; i < 1800; i++) {
+    _grid.reset(Tools::GUMS);
+    for (auto& cell : _grid.cells) {
         randomValue = dist(_rng);
         if (randomValue < 20)
-            _grid.cells[i] = Tools::WALL;
-        else
-            _grid.cells[i] = Tools::EMPTY;
+            cell = Tools::WALL;
     }
-    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
-        _grid.setPosition({x, offsetY}, Tools::WALL);
-    }
-    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
-        _grid.setPosition({offsetX, y}, Tools::WALL);
-    }
-    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
-        _grid.setPosition({offsetX + GHOST_ZONE_WIDTH - 1, y}, Tools::WALL);
-    }
-    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
-        if (x == gateX || x == gateX + 1) {
-            _grid.setPosition({x, gateY}, Tools::GATE);
-        } else {
-            _grid.setPosition({x, gateY}, Tools::WALL);
+
+    for (int y = offsetY; y <= offsetY + GHOST_ZONE_HEIGHT; y++) {
+        for (int x = offsetX; x <= offsetX + GHOST_ZONE_WIDTH; x++) {
+            bool isBorder = (x == offsetX || x == offsetX + GHOST_ZONE_WIDTH || y == offsetY || y == offsetY + GHOST_ZONE_HEIGHT);
+            if (isBorder) {
+                if (y == gateY && (x == gateX || x == gateX + 1))
+                    _grid.setPosition({x, y}, Tools::GATE);
+                else
+                    _grid.setPosition({x, y}, Tools::WALL);
+            } else {
+                _grid.setPosition({x, y}, Tools::EMPTY);
+            }
         }
     }
 }
@@ -136,6 +121,7 @@ void PacMan::init()
     _grid.reset(Tools::EMPTY);
     _pacGuns.clear();
     _nbPacGun = 0;
+    _gameWon = false;
     _gameOver = false;
     _superPac = false;
     _superPacTimer = 0ns;
@@ -144,15 +130,11 @@ void PacMan::init()
     createMap(randomValue, dist);
     PacMan::setPacmanPosition();
     PacMan::setGhostsPositions();
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            randomValue = dist(_rng);
-            Tools::Vec2 pos = {x, y};
-            Tools::CellType cellType = _grid.getPosition(pos);
-            if (_grid.getPosition(pos) == Tools::EMPTY && randomValue < 1) {
-                if (spawnPacGun());
-                    _pacGuns.insert(pos);
-            }
+    for (size_t i = 0; i < TARGET_GUN; i++) {
+        auto pacGunCoords = getRandomGumCoord();
+        if (pacGunCoords) {
+            _pacGuns.insert(*pacGunCoords);
+            _nbPacGun++;
         }
     }
 }
@@ -168,6 +150,7 @@ void PacMan::destroy()
 
 void PacMan::restart()
 {
+    _gameScore = 0;
     destroy();
     init();
 }
@@ -184,29 +167,6 @@ void PacMan::handleEvent(Events::Event evt, IDisplay&)
         default:
             return;
     }
-}
-
-void PacMan::eatGhosts(Player& player)
-{
-    if (_superPac) {
-        int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
-        int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
-        for (int i = 0; i < 4; i++) {
-            if (_pacman == _ghosts[i]) {
-                _grid.setPosition(_ghosts[i], Tools::EMPTY);
-                _ghosts[i] = {offsetX + 2 + (i % 2), offsetY + 2 + (i / 2)};
-                _grid.setPosition(_ghosts[i], Tools::GHOST);
-                _ghostFrozenUntil[i] = _accumulator + 2s;
-            }
-        }
-        player.score += 20;
-    }
-}
-
-void PacMan::superPacActions(Player& player)
-{
-    _superPacTimer = 0ns;
-    eatGhosts(player);
 }
 
 void PacMan::moveGhosts(int ghostIndex)
@@ -228,15 +188,21 @@ void PacMan::moveGhosts(int ghostIndex)
     }
     if (!validMoves.empty()) {
         std::uniform_int_distribution<size_t> dist(0, validMoves.size() - 1);
-        Tools::Vec2 newPos = validMoves[dist(_rng)];
-        _grid.setPosition(_ghosts[ghostIndex], Tools::EMPTY);
-        _ghosts[ghostIndex] = newPos;
-        _grid.setPosition(newPos, Tools::GHOST);
+        _ghosts[ghostIndex] = validMoves[dist(_rng)];
+    }
+}
+
+void PacMan::eatGum(Tools::Vec2 nextCell)
+{
+    if (Tools::GUMS == _grid.getPosition(nextCell)) {
+        _gameScore += 1;
+        _grid.setPosition(nextCell, Tools::EMPTY);
     }
 }
 
 void PacMan::update(std::chrono::nanoseconds dt, Player& player)
 {
+    player.score = _gameScore;
     if (_gameOver || _gameWon)
         return;
     _superPacTimer += dt;
@@ -244,30 +210,40 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
     if (_accumulator < MOVE_DELAY)
         return;
     _accumulator -= MOVE_DELAY;
+
     auto nextCell = _grid.wrap(_pacman + _dir);
+    if (_grid.getPosition(nextCell) != Tools::WALL && _grid.getPosition(nextCell) != Tools::GATE) {
+        _pacman = nextCell;
+    }
+
+    eatGum(_pacman);
+    if (_pacGuns.count(_pacman) > 0) {
+        _pacGuns.erase(_pacman);
+        eatPacGun(player);
+        _superPacTimer = 0ns;
+    }
+
+    for (int i = 0; i < 4; i++) {
+        if (_ghostFrozenUntil[i] < _superPacTimer)
+            moveGhosts(i);
+    }
 
     for (int i = 0; i < 4; i++) {
         if (_pacman == _ghosts[i]) {
-            if (_superPac) {
-                eatGhosts(player);
-            } else {
+            if (!_superPac) {
                 _gameOver = true;
+                return;
+            }
+            if (_superPac && _ghostFrozenUntil[i] < _superPacTimer) {
+                _gameScore += 20;
+                int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
+                int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
+                _ghosts[i] = {offsetX + 2 + (i % 2), offsetY + 2 + (i / 2)};
+                _ghostFrozenUntil[i] = _superPacTimer + 10s;
             }
         }
-        if (_ghostFrozenUntil[i] < _accumulator)
-            PacMan::moveGhosts(i);
     }
 
-    if (_grid.getPosition(nextCell) != Tools::WALL && _grid.getPosition(nextCell) != Tools::GATE) {
-        _grid.setPosition(_pacman, Tools::EMPTY);
-        _pacman = nextCell;
-        _grid.setPosition(_pacman, Tools::HEAD);
-    }
-    if (_pacGuns.count(nextCell) > 0) {
-        _pacGuns.erase(nextCell);
-        eatPacGun(player);
-        superPacActions(player);
-    }
     if (_superPac && _superPacTimer > 10s)
         _superPac = false;
     if (_nbPacGun == 0)
@@ -287,7 +263,10 @@ void PacMan::render(IDisplay& display)
         for (long y = 0; y < MAP_HEIGHT; ++y)
             display.draw(Arcade::Shapes::Point(x + 1, y + 1, getCellColor(_grid.getPosition({x, y}))));
     for (const auto& pacGun : _pacGuns)
-        display.draw(Arcade::Shapes::Point(pacGun.x + 1, pacGun.y + 1, Arcade::Colors::WHITE));
+        display.draw(Arcade::Shapes::Point(pacGun.x + 1, pacGun.y + 1, getCellColor(Tools::PACGUN)));
+    for (const auto& ghostPos : _ghosts)
+        display.draw(Arcade::Shapes::Point(ghostPos.x + 1, ghostPos.y + 1, getCellColor(Tools::GHOST)));
+    display.draw(Arcade::Shapes::Point(_pacman.x + 1, _pacman.y + 1, getCellColor(Tools::HEAD)));
     if (_gameOver) {
         Arcade::Text endDialog("GAME OVER ! PRESS \'R\' to restart the game!");
 
@@ -320,8 +299,9 @@ Color PacMan::getCellColor(Tools::CellType type)
         case Tools::HEAD: return _superPac ? Colors::PURPLE : Colors::YELLOW;
         case Tools::WALL: return Colors::BLUE;
         case Tools::GATE: return Colors::PURPLE;
-        case Tools::PACGUN: return Colors::YELLOW;
+        case Tools::PACGUN: return ORANGE;
         case Tools::EMPTY: return Colors::BLACK;
+        case Tools::GUMS: return Colors::WHITE;
         default: return Colors::BLACK;
     }
 }

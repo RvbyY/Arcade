@@ -1,3 +1,4 @@
+#include <array>
 #include <chrono>
 #include <deque>
 #include <optional>
@@ -29,6 +30,8 @@ namespace Arcade {
             static constexpr Arcade::Color YELLOW = 0xffce1b;
             static constexpr Arcade::Color PURPLE = 0x7f00ff;
             static constexpr Arcade::Color BLUE = 0x111184;
+            static constexpr Arcade::Color ORANGE = 0xff9900;
+            static constexpr int NB_CELLS = 1800;
             static constexpr int MAP_WIDTH = 60;
             static constexpr int MAP_HEIGHT = 30;
             static constexpr int GHOST_ZONE_WIDTH = 5;
@@ -45,11 +48,10 @@ namespace Arcade {
             // helpers
             bool spawnPacGun();
             void eatPacGun(Player& player);
-            void eatGhosts(Player& player);
-            void superPacActions(Player& player);
+            void eatGum(Tools::Vec2 nextCell);
             void moveGhosts(int);
             void createMap(int, std::uniform_int_distribution<int>);
-            std::optional<Tools::Vec2> getRandomEmptyCoord();
+            std::optional<Tools::Vec2> getRandomGumCoord();
             Arcade::Color getCellColor(Tools::CellType type);
 
             // state
@@ -64,6 +66,7 @@ namespace Arcade {
             bool _gameOver;
             bool _gameWon;
             bool _superPac;
+            size_t _gameScore;
             std::chrono::nanoseconds _superPacTimer;
             std::array<std::chrono::nanoseconds, 4> _ghostFrozenUntil;
             std::unordered_set<Tools::Vec2, Tools::Vec2Hash> _pacGuns;
