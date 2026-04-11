@@ -31,5 +31,6 @@ namespace Arcade {
         private:
             Core& _core;
             std::optional<Events::Event> _pendingEvent;
+            std::string _input;
     };
 }

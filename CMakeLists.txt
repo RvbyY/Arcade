@@ -23,6 +23,7 @@ add_executable(arcade
     src/menu/UserInputMenu.cpp
     src/menu/UsernameSelection.cpp
     src/core/overlays/debugOverlay.cpp
+    src/core/playerContainer/playerContainer.cpp
 )
 target_include_directories(arcade PRIVATE include lib/libarcade)
 
