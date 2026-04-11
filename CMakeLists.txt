@@ -104,5 +104,10 @@ add_arcade_lib(arcade_snake
 )
 target_include_directories(arcade_snake PRIVATE include lib/libarcade)
 
+add_arcade_lib(arcade_pacman
+    src/game/pacman/pacman.cpp
+)
+target_include_directories(arcade_pacman PRIVATE include lib/libarcade)
+
 
 # ─── Game libraries ───────────────────────────────────────────────────────────

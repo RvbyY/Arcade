@@ -3,8 +3,9 @@
 #include <optional>
 #include <random>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
-#include "game.hpp"
+#include "Arcade/game.hpp"
 #include "tools/grid.hpp"
 
 namespace Arcade {
@@ -27,10 +28,13 @@ namespace Arcade {
         private:
             static constexpr Arcade::Color YELLOW = 0xffce1b;
             static constexpr Arcade::Color PURPLE = 0x7f00ff;
+            static constexpr Arcade::Color BLUE = 0x111184;
             static constexpr int MAP_WIDTH = 60;
             static constexpr int MAP_HEIGHT = 30;
             static constexpr int GHOST_ZONE_WIDTH = 5;
             static constexpr int GHOST_ZONE_HEIGHT = 4;
+            static constexpr int GHOST_ZONE_CENTER_X = MAP_WIDTH / 2;
+            static constexpr int GHOST_ZONE_CENTER_Y = MAP_HEIGHT / 2;
             static constexpr int TARGET_GUN = 2;
             static constexpr int GUN_MAX_ATTEMPs = 50;
             static constexpr std::chrono::milliseconds MOVE_DELAY = std::chrono::milliseconds(100);
@@ -57,6 +61,6 @@ namespace Arcade {
             bool _superPac;
             std::chrono::nanoseconds _superPacTimer;
             std::array<std::chrono::nanoseconds, 4> _ghostFrozenUntil;
-            std::set<Tools::Vec2> _pacGuns;
+            std::unordered_set<Tools::Vec2, Tools::Vec2Hash> _pacGuns;
     };
 }

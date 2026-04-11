@@ -4,8 +4,8 @@
 */
 
 #include "game/pacman/pacman.hpp"
-#include "display.hpp"
-#include "utils.hpp"
+#include "../lib/libarcade/Arcade/display.hpp"
+#include "../lib/libarcade/Arcade/utils.hpp"
 #include <chrono>
 
 namespace Arcade {
@@ -23,12 +23,14 @@ PacMan::PacMan()
     , _superPacTimer(0)
     , _ghostFrozenUntil{0ns, 0ns, 0ns, 0ns}
     , _ghostPoint{0, 0, 0, 0}
-{}
+{
+    _ghosts.resize(4, {0, 0});
+}
 
 std::optional<Tools::Vec2> PacMan::getRandomEmptyCoord()
 {
-    std::uniform_int_distribution<Arcade::Coordinate> distX(0, MAP_WIDTH - 1);  // Now 0 to 59
-    std::uniform_int_distribution<Arcade::Coordinate> distY(0, MAP_HEIGHT - 1);  // 0 to 29
+    std::uniform_int_distribution<Arcade::Coordinate> distX(0, MAP_WIDTH - 1);
+    std::uniform_int_distribution<Arcade::Coordinate> distY(0, MAP_HEIGHT - 1);
     Tools::Vec2 coords = {distX(_rng), distY(_rng)};
 
     for (size_t i = 0; i < GUN_MAX_ATTEMPs; i++) {
@@ -43,13 +45,11 @@ void PacMan::setPacmanPosition()
 {
     int z = 0;
 
-    Tools::Vec2 coords = {MAP_WIDTH / 2, MAP_HEIGHT / 2};
+    Tools::Vec2 coords = {0, 0};
     while (_grid.getPosition(coords) == Tools::WALL) {
         if (coords.x < MAP_WIDTH / 2)
             coords.x++;
-        else
-            coords.x--;
-        if (z % 5 == 0)
+        else if (z % 5 == 0)
             coords.y++;
         z++;
     }
@@ -61,13 +61,15 @@ void PacMan::setPacmanPosition()
 void PacMan::setGhostsPositions()
 {
     Tools::Vec2 coords;
+    int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
+    int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
 
     for (int i = 0; i < 4; i++) {
         if (i == 0 || i % 2 == 0)
-            coords = {GHOST_ZONE_WIDTH - 1 - i, GHOST_ZONE_HEIGHT - 1};
+            coords = {offsetX + GHOST_ZONE_WIDTH - 1 - i, offsetY + GHOST_ZONE_HEIGHT - 1};
         else
-            coords = {GHOST_ZONE_WIDTH - 1, GHOST_ZONE_HEIGHT - 1 - i};
-        _ghosts.push_back(coords);
+            coords = {offsetX + GHOST_ZONE_WIDTH - 1, offsetY + GHOST_ZONE_HEIGHT - 1 - i};
+        _ghosts[i] = coords;
         _grid.setPosition(coords, Tools::GHOST);
     }
 }
@@ -95,10 +97,20 @@ void PacMan::eatPacGun()
 void PacMan::init()
 {
     std::uniform_int_distribution<int> dist(0, 100);
+    int randomValue;
+
+    _grid.reset(Tools::EMPTY);
+    _pacGuns.clear();
+    _nbPacGun = 0;
+    _gameOver = false;
+    _superPac = false;
+    _superPacTimer = 0ns;
+    for (int i = 0; i < 4; i++)
+        _ghostFrozenUntil[i] = 0ns;
 
     for (unsigned int i = 0; i < 1800; i++) {
-        int randomValue = dist(_rng);
-        if (randomValue < 40)
+        randomValue = dist(_rng);
+        if (randomValue < 20)
             _grid.cells[i] = Tools::WALL;
         else
             _grid.cells[i] = Tools::EMPTY;
@@ -107,8 +119,11 @@ void PacMan::init()
     PacMan::setGhostsPositions();
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            if (_grid.getPosition({x, y}) == Tools::EMPTY) {
-                _pacGuns.insert({x, y});
+            randomValue = dist(_rng);
+            Tools::Vec2 pos = {x, y};
+            Tools::CellType cellType = _grid.getPosition(pos);
+            if (_grid.getPosition(pos) == Tools::EMPTY && randomValue < 2) {
+                _pacGuns.insert(pos);
                 _nbPacGun++;
             }
         }
@@ -117,11 +132,11 @@ void PacMan::init()
 
 void PacMan::destroy()
 {
-    _grid.cells.clear();
-    _grid.cells.shrink_to_fit();
-    _ghosts.clear();
-    _ghosts.shrink_to_fit();
+    _grid.reset(Tools::EMPTY);
+    for (auto& ghost : _ghosts)
+        ghost = {0, 0};
     _pacGuns.clear();
+    _nbPacGun = 0;
 }
 
 void PacMan::restart()
@@ -147,10 +162,12 @@ void PacMan::handleEvent(Events::Event evt, IDisplay&)
 void PacMan::eatGhosts()
 {
     if (_superPac) {
+        int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
+        int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
         for (int i = 0; i < 4; i++) {
             if (_pacman == _ghosts[i]) {
                 _grid.setPosition(_ghosts[i], Tools::EMPTY);
-                _ghosts[i] = {GHOST_ZONE_WIDTH - 1 - i, GHOST_ZONE_HEIGHT - 1};
+                _ghosts[i] = {offsetX + GHOST_ZONE_WIDTH - 1 - i, offsetY + GHOST_ZONE_HEIGHT - 1};
                 _grid.setPosition(_ghosts[i], Tools::GHOST);
                 _ghostFrozenUntil[i] = _accumulator + 10s;
             }
@@ -172,7 +189,7 @@ void PacMan::moveGhosts(int ghostIndex)
     while (_grid.cells[randomValue] == Tools::WALL)
         randomValue = dist(_rng);
     int x = randomValue % MAP_WIDTH;
-    int y = randomValue % MAP_HEIGHT;
+    int y = randomValue / MAP_WIDTH;
     Tools::Vec2 targetCoord = {x, y};
     Tools::Vec2 ghostPos = _ghosts[ghostIndex];
 
@@ -229,6 +246,13 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
 
 void PacMan::render(IDisplay& display)
 {
+    int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
+    int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
+
+    display.clear();
+    for (long x = 0; x < MAP_WIDTH + 2; x++)
+        for (long y = 0; y < MAP_HEIGHT + 2; y++)
+            display.draw(Arcade::Shapes::Point(x, y, Arcade::Colors::BLACK));
     for (long x = 0; x < MAP_WIDTH; x++)
         for (long y = 0; y < MAP_HEIGHT; ++y)
             display.draw(Arcade::Shapes::Point(x + 1, y + 1, getCellColor(_grid.getPosition({x, y}))));
@@ -241,11 +265,10 @@ void PacMan::render(IDisplay& display)
         endDialog.y = MAP_HEIGHT / 2;
         display.draw(endDialog);
     }
-    display.draw(Arcade::Shapes::Rectangle(1, 1, GHOST_ZONE_WIDTH + 1, 1, Arcade::Colors::BLUE));
-    display.draw(Arcade::Shapes::Rectangle(1, 1, 1, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::BLUE));
-    display.draw(Arcade::Shapes::Rectangle(1, GHOST_ZONE_HEIGHT + 1, GHOST_ZONE_WIDTH + 1, 0, Arcade::Colors::BLUE));
-    display.draw(Arcade::Shapes::Rectangle(GHOST_ZONE_WIDTH + 1, 1, 0, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::BLUE));
-
+    display.draw(Arcade::Shapes::Rectangle(offsetX + 1, offsetY + 1, GHOST_ZONE_WIDTH + 1, 1, Arcade::Colors::CYAN));
+    display.draw(Arcade::Shapes::Rectangle(offsetX + 1, offsetY + 1, 1, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::CYAN));
+    display.draw(Arcade::Shapes::Rectangle(offsetX + 1, offsetY + GHOST_ZONE_HEIGHT + 1, GHOST_ZONE_WIDTH + 1, 0, Arcade::Colors::CYAN));
+    display.draw(Arcade::Shapes::Rectangle(offsetX + GHOST_ZONE_WIDTH + 1, offsetY + 1, 0, GHOST_ZONE_HEIGHT + 1, Arcade::Colors::CYAN));
     display.draw(Arcade::Shapes::Rectangle(0, 0, MAP_WIDTH + 2, 0, Arcade::Colors::BLUE));
     display.draw(Arcade::Shapes::Rectangle(0, 0, 0, MAP_HEIGHT + 2, Arcade::Colors::BLUE));
     display.draw(Arcade::Shapes::Rectangle(0, MAP_HEIGHT + 1, MAP_WIDTH + 2, 0, Arcade::Colors::BLUE));
@@ -256,10 +279,11 @@ Color PacMan::getCellColor(Tools::CellType type)
 {
     switch (type)
     {
-        case Tools::GHOST: return Colors::CYAN;
+        case Tools::GHOST: return _superPac ? Colors::GREEN : Colors::RED;
         case Tools::HEAD: return _superPac ? Colors::PURPLE : Colors::YELLOW;
         case Tools::WALL: return Colors::BLUE;
         case Tools::PACGUN: return Colors::YELLOW;
+        case Tools::EMPTY: return Colors::BLACK;
         default: return Colors::BLACK;
     }
 }
