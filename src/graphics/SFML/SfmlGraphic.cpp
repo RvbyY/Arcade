@@ -18,18 +18,12 @@ extern "C" {
 
 static sf::Color ColorToSfml(const Arcade::Color& color)
 {
-    Arcade::Color simple = color.simple();
-    switch (simple) {
-        case Arcade::BLACK:  return sf::Color::Black;
-        case Arcade::RED:    return sf::Color::Red;
-        case Arcade::GREEN:  return sf::Color::Green;
-        case Arcade::BLUE:   return sf::Color::Blue;
-        case Arcade::PURPLE: return sf::Color::Magenta;
-        case Arcade::YELLOW: return sf::Color::Yellow;
-        case Arcade::CYAN:   return sf::Color::Cyan;
-        case Arcade::WHITE:  return sf::Color::White;
-        default:             return sf::Color::White;
-    }
+    return {
+        color.red,
+        color.green,
+        color.blue,
+        color.alpha
+    };
 }
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
@@ -106,6 +100,7 @@ void SfmlGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 void SfmlGraphic::draw(const Arcade::Text& text)
 {
     sf::Text sfText;
+
     sfText.setFont(_font);
     sfText.setString(text.content);
     sfText.setCharacterSize(static_cast<unsigned int>(CELL_H));

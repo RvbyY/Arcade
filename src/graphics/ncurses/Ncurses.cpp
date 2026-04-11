@@ -12,7 +12,24 @@ extern "C" {
 }
 
 namespace {
-    int toPairFG(const Arcade::Color& col)
+    short toNcursesColor(const Arcade::Color& col)
+    {
+        const auto simple = col.simple();
+
+        switch (simple)
+        {
+            case Arcade::Colors::RED   : return COLOR_RED;
+            case Arcade::Colors::GREEN : return COLOR_GREEN;
+            case Arcade::Colors::YELLOW: return COLOR_YELLOW;
+            case Arcade::Colors::BLUE  : return COLOR_BLUE;
+            case Arcade::Colors::PURPLE: return COLOR_MAGENTA;
+            case Arcade::Colors::CYAN  : return COLOR_CYAN;
+            case Arcade::Colors::WHITE : return COLOR_WHITE;
+            default: return COLOR_BLACK;
+        }
+    }
+
+    int toColorIndex(const Arcade::Color& col)
     {
         const auto simple = col.simple();
 
@@ -25,25 +42,15 @@ namespace {
             case Arcade::Colors::BLUE  : return 5;
             case Arcade::Colors::PURPLE: return 6;
             case Arcade::Colors::CYAN  : return 7;
-            default: return 0; // default (black)
+            default: return 0;
         }
     }
 
-    int toPairBG(const Arcade::Color& col)
+    int toPair(const Arcade::Color& fg, const Arcade::Color& bg)
     {
-        const auto simple = col.simple();
+        constexpr int paletteSize = 8;
 
-        switch (simple)
-        {
-            case Arcade::Colors::WHITE : return 8;
-            case Arcade::Colors::RED   : return 9;
-            case Arcade::Colors::GREEN : return 10;
-            case Arcade::Colors::YELLOW: return 11;
-            case Arcade::Colors::BLUE  : return 12;
-            case Arcade::Colors::PURPLE: return 13;
-            case Arcade::Colors::CYAN  : return 14;
-            default: return 0; // default (black)
-        }
+        return toColorIndex(fg) * paletteSize + toColorIndex(bg) + 1;
     }
 }
 
@@ -59,21 +66,26 @@ void NcursesGraphic::open()
     set_escdelay(5);
 
     if (has_colors()) {
+        static constexpr Arcade::Color palette[] = {
+            Arcade::Colors::BLACK,
+            Arcade::Colors::WHITE,
+            Arcade::Colors::RED,
+            Arcade::Colors::GREEN,
+            Arcade::Colors::YELLOW,
+            Arcade::Colors::BLUE,
+            Arcade::Colors::PURPLE,
+            Arcade::Colors::CYAN,
+        };
+
         start_color();
-        init_pair(1, COLOR_WHITE,   COLOR_BLACK);
-        init_pair(2, COLOR_RED,     COLOR_BLACK);
-        init_pair(3, COLOR_GREEN,   COLOR_BLACK);
-        init_pair(4, COLOR_YELLOW,  COLOR_BLACK);
-        init_pair(5, COLOR_BLUE,    COLOR_BLACK);
-        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
-        init_pair(7, COLOR_CYAN,    COLOR_BLACK);
-        init_pair(8, COLOR_BLACK,   COLOR_WHITE);
-        init_pair(9, COLOR_BLACK,     COLOR_RED);
-        init_pair(10, COLOR_BLACK,   COLOR_GREEN);
-        init_pair(11, COLOR_BLACK,  COLOR_YELLOW);
-        init_pair(12, COLOR_BLACK,    COLOR_BLUE);
-        init_pair(13, COLOR_BLACK, COLOR_MAGENTA);
-        init_pair(14, COLOR_BLACK,    COLOR_CYAN);
+        int pairId = 1;
+
+        for (const auto& fg : palette) {
+            for (const auto& bg : palette) {
+                init_pair(pairId, toNcursesColor(fg), toNcursesColor(bg));
+                pairId++;
+            }
+        }
     }
 }
 
@@ -99,38 +111,20 @@ void NcursesGraphic::display()
     ::refresh();
 }
 
-static short ColorToNcurses(const Arcade::Color& color)
-{
-    Arcade::Color simple = color.simple();
-
-    switch (simple) {
-        case Arcade::BLACK:  return COLOR_BLACK;
-        case Arcade::RED:    return COLOR_RED;
-        case Arcade::GREEN:  return COLOR_GREEN;
-        case Arcade::BLUE:   return COLOR_BLUE;
-        case Arcade::PURPLE: return COLOR_MAGENTA;
-        case Arcade::YELLOW: return COLOR_YELLOW;
-        case Arcade::CYAN:   return COLOR_CYAN;
-        case Arcade::WHITE:  return COLOR_WHITE;
-        default:             return COLOR_WHITE;
-    }
-}
-
 void NcursesGraphic::draw(const Arcade::Shapes::Point& point)
 {
     int maxY, maxX;
     getmaxyx(stdscr, maxY, maxX);
     if (point.x >= maxX || point.y >= maxY || point.x < 0 || point.y < 0)
         return;
-    // Map your color to an ncurses color pair (assumes you've set up color pairs)
-    attron(COLOR_PAIR(toPairBG(point.color)));
-    mvaddch(point.y, point.x, ' ');   // or whatever char represents a point
-    attroff(COLOR_PAIR(toPairBG(point.color)));
+    attron(COLOR_PAIR(toPair(Arcade::Colors::BLACK, point.color)));
+    mvaddch(point.y, point.x, ' ');
+    attroff(COLOR_PAIR(toPair(Arcade::Colors::BLACK, point.color)));
 }
 
 void NcursesGraphic::draw(const Arcade::Shapes::Rectangle& rect)
 {
-    attron(COLOR_PAIR(toPairBG(rect.color)));
+    attron(COLOR_PAIR(toPair(Arcade::Colors::BLACK, rect.color)));
 
     for (int y = rect.y; y < rect.y + rect.height + (rect.height == 0); y++) {
         for (int x = rect.x; x < rect.x + rect.width + (rect.width == 0); x++) {
@@ -138,7 +132,7 @@ void NcursesGraphic::draw(const Arcade::Shapes::Rectangle& rect)
         }
     }
 
-    attroff(COLOR_PAIR(toPairBG(rect.color)));
+    attroff(COLOR_PAIR(toPair(Arcade::Colors::BLACK, rect.color)));
 }
 
 void NcursesGraphic::draw(const Arcade::Text& text)
@@ -147,9 +141,11 @@ void NcursesGraphic::draw(const Arcade::Text& text)
     getmaxyx(stdscr, maxY, maxX);
     if (text.x >= maxX || text.y >= maxY || text.x < 0 || text.y < 0)
         return;
-    attron(COLOR_PAIR(toPairFG(text.color)));
-    mvprintw(text.y, text.x, "%s", text.content.c_str());
-    attroff(COLOR_PAIR(toPairFG(text.color)));
+    const auto maxWidth = maxX - text.x;
+
+    attron(COLOR_PAIR(toPair(text.color, Arcade::Colors::BLACK)));
+    mvaddnstr(text.y, text.x, text.content.c_str(), maxWidth);
+    attroff(COLOR_PAIR(toPair(text.color, Arcade::Colors::BLACK)));
 }
 
 std::optional<Arcade::Event> NcursesGraphic::pollEvent()
