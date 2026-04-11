@@ -4,9 +4,9 @@
 #include <SFML/Graphics.hpp>
 #include <utility>
 
-// ─── Cell dimensions (SFML has no "character grid" — we fake one) ────────────
-static constexpr float CELL_W = 12.f;
-static constexpr float CELL_H = 18.f;
+// ─── Cell dimensions ─────────────────────────────────────────────────────────
+static constexpr float CELL_W = 24.f;
+static constexpr float CELL_H = 40.f;
 
 extern "C" {
     Arcade::IDisplay* get_display() {
@@ -38,16 +38,14 @@ void SfmlGraphic::open()
 {
     setIsWinOpen(true);
     _window.create(
-        sf::VideoMode(1280, 720),
+        sf::VideoMode::getDesktopMode(),
         "Arcade",
         sf::Style::Close | sf::Style::Titlebar | sf::Style::Resize
     );
     _window.setFramerateLimit(60);
 
-    // Load a monospace font for text drawing
-    // Adjust path to wherever your font lives in the project
     if (!_font.loadFromFile("assets/fonts/DejaVuSansMono.ttf")) {
-        // Fallback: try a common system path
+        // Fallback: common system path
         _font.loadFromFile("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf");
     }
 }
@@ -122,10 +120,24 @@ std::optional<Arcade::Event> SfmlGraphic::pollEvent()
 {
     sf::Event event;
     while (_window.pollEvent(event)) {
+        if (event.type == sf::Event::Resized) {
+            sf::View view = _window.getDefaultView();
+            view.setSize({
+                static_cast<float>(event.size.width),
+                static_cast<float>(event.size.height)
+            });
+            view.setCenter(event.size.width / 2, event.size.height / 2);
+            _window.setView(view);
+            return Arcade::Events::ARC_RESIZE;
+        }
+        if (event.type == sf::Event::MouseMoved) {
+            return Arcade::Events::ARC_MOUSE_MOVE;
+        }
+        if (event.type == sf::Event::Closed) {
+            return Arcade::Events::ARC_KEY_ESC;
+        }
         if (event.type == sf::Event::KeyPressed) {
-            auto mapped = SfmlGraphic::pollEvent();
-            if (mapped.has_value())
-                return mapped;
+            return KeySwitch(event.key.code);
         }
     }
     return std::nullopt;

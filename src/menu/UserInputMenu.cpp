@@ -27,23 +27,25 @@ void Arcade::UserInputMenu::update(std::chrono::nanoseconds dt, Player& player)
 {
     (void)dt;
     (void)player;
-    std::string& username = _core.getCurrentPlayer().name;
 
     if (!_pendingEvent.has_value()) {
         return;
     }
     switch (*_pendingEvent) {
         case Arcade::Event::ARC_KEY_RETURN:
-            if (_core.confirmCurrentPlayerSelection())
-                return _core.switchToSelectMenu();
+            if (_input.empty())
+                return;
+            _core.setPlayer(_input);
+            _core.switchToSelectMenu();
+            return;
         case Arcade::Event::ARC_KEY_BACKSPACE:
-            if (!username.empty())
-                username.pop_back();
+            if (!_input.empty())
+                _input.pop_back();
             break;
         default: {
             const char character = EventToChar(*_pendingEvent);
-            if (character != 0 && username.size() < 16) {
-                username += character;
+            if (character != 0 && _input.size() < 16) {
+                _input += character;
             }
             break;
         }
@@ -55,10 +57,9 @@ void Arcade::UserInputMenu::render(IDisplay& display)
 {
     const Arcade::Color white(255, 255, 255);
     const Arcade::Color yellow(255, 255, 0);
-    const std::string& username = _core.getCurrentPlayer().name;
 
     display.draw(Arcade::Text{"Enter your username:", 10, 5, white});
-    display.draw(Arcade::Text{"> " + username + "_", 10, 7, yellow});
+    display.draw(Arcade::Text{"> " + _input + "_", 10, 7, yellow});
     display.draw(Arcade::Text{"Press ENTER to confirm", 10, 10, white});
 }
 

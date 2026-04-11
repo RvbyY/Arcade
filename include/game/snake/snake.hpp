@@ -48,7 +48,8 @@ namespace Arcade {
             Arcade::Color getCellColor(Tools::CellType type);
 
             // state
-            size_t nbApples;
+            size_t _gameScore;
+            size_t _nbApples;
             Tools::Grid<Tools::CellType> _grid;
             std::mt19937 _rng;
             std::deque<Tools::Vec2> _snake;               // front = head
