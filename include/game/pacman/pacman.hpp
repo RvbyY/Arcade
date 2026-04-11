@@ -48,6 +48,7 @@ namespace Arcade {
             void eatGhosts();
             void superPacActions();
             void moveGhosts(int);
+            void drawMap(int, std::uniform_int_distribution<int>);
             std::optional<Tools::Vec2> getRandomEmptyCoord();
             Arcade::Color getCellColor(Tools::CellType type);
 

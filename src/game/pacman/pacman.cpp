@@ -94,12 +94,42 @@ void PacMan::eatPacGun()
     PacMan::spawnPacGun();
 }
 
+void PacMan::drawMap(int randomValue, std::uniform_int_distribution<int> dist)
+{
+    int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
+    int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
+    int gateX = offsetX + GHOST_ZONE_WIDTH / 2;
+    int gateY = offsetY + GHOST_ZONE_HEIGHT;
+
+    for (unsigned int i = 0; i < 1800; i++) {
+        randomValue = dist(_rng);
+        if (randomValue < 20)
+            _grid.cells[i] = Tools::WALL;
+        else
+            _grid.cells[i] = Tools::EMPTY;
+    }
+    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
+        _grid.setPosition({x, offsetY}, Tools::WALL);
+    }
+    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
+        _grid.setPosition({offsetX, y}, Tools::WALL);
+    }
+    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
+        _grid.setPosition({offsetX + GHOST_ZONE_WIDTH - 1, y}, Tools::WALL);
+    }
+    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
+        if (x == gateX || x == gateX + 1) {
+            _grid.setPosition({x, gateY}, Tools::GATE);
+        } else {
+            _grid.setPosition({x, gateY}, Tools::WALL);
+        }
+    }
+}
+
 void PacMan::init()
 {
     std::uniform_int_distribution<int> dist(0, 100);
     int randomValue;
-    int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
-    int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
 
     _grid.reset(Tools::EMPTY);
     _pacGuns.clear();
@@ -109,40 +139,7 @@ void PacMan::init()
     _superPacTimer = 0ns;
     for (int i = 0; i < 4; i++)
         _ghostFrozenUntil[i] = 0ns;
-
-    for (unsigned int i = 0; i < 1800; i++) {
-        randomValue = dist(_rng);
-        if (randomValue < 20)
-            _grid.cells[i] = Tools::WALL;
-        else
-            _grid.cells[i] = Tools::EMPTY;
-    }
-    
-    // Create ghost zone walls with gate at bottom
-    int gateX = offsetX + GHOST_ZONE_WIDTH / 2;
-    int gateY = offsetY + GHOST_ZONE_HEIGHT;
-    
-    // Top wall
-    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
-        _grid.setPosition({x, offsetY}, Tools::WALL);
-    }
-    // Left wall
-    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
-        _grid.setPosition({offsetX, y}, Tools::WALL);
-    }
-    // Right wall
-    for (int y = offsetY + 1; y < offsetY + GHOST_ZONE_HEIGHT; y++) {
-        _grid.setPosition({offsetX + GHOST_ZONE_WIDTH - 1, y}, Tools::WALL);
-    }
-    // Bottom wall with gate opening (2 cells wide)
-    for (int x = offsetX + 1; x < offsetX + GHOST_ZONE_WIDTH; x++) {
-        if (x == gateX || x == gateX + 1) {
-            _grid.setPosition({x, gateY}, Tools::GATE);
-        } else {
-            _grid.setPosition({x, gateY}, Tools::WALL);
-        }
-    }
-    
+    drawMap(randomValue, dist);
     PacMan::setPacmanPosition();
     PacMan::setGhostsPositions();
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -195,7 +192,7 @@ void PacMan::eatGhosts()
         for (int i = 0; i < 4; i++) {
             if (_pacman == _ghosts[i]) {
                 _grid.setPosition(_ghosts[i], Tools::EMPTY);
-                _ghosts[i] = {offsetX + GHOST_ZONE_WIDTH - 1 - i, offsetY + GHOST_ZONE_HEIGHT - 1};
+                _ghosts[i] = {offsetX + 2 + (i % 2), offsetY + 2 + (i / 2)};
                 _grid.setPosition(_ghosts[i], Tools::GHOST);
                 _ghostFrozenUntil[i] = _accumulator + 10s;
             }
@@ -211,33 +208,28 @@ void PacMan::superPacActions()
 
 void PacMan::moveGhosts(int ghostIndex)
 {
-    std::uniform_int_distribution<int> dist(0, MAP_WIDTH * MAP_HEIGHT - 1);
-    int randomValue = dist(_rng);
-
-    while (_grid.cells[randomValue] == Tools::WALL)
-        randomValue = dist(_rng);
-    int x = randomValue % MAP_WIDTH;
-    int y = randomValue / MAP_WIDTH;
-    Tools::Vec2 targetCoord = {x, y};
     Tools::Vec2 ghostPos = _ghosts[ghostIndex];
+    std::vector<Tools::Vec2> validMoves;
+    Tools::Vec2 directions[] = {
+        {ghostPos.x + 1, ghostPos.y},
+        {ghostPos.x - 1, ghostPos.y},
+        {ghostPos.x, ghostPos.y + 1},
+        {ghostPos.x, ghostPos.y - 1}
+    };
 
-    if (ghostPos.x < targetCoord.x)
-        ghostPos.x++;
-    else if (ghostPos.x > targetCoord.x)
-        ghostPos.x--;
-    else if (ghostPos.y < targetCoord.y)
-        ghostPos.y++;
-    else if (ghostPos.y > targetCoord.y)
-        ghostPos.y--;
-
-    if (_grid.getPosition(ghostPos) != Tools::WALL) {
-        _grid.setPosition(_ghosts[ghostIndex], Tools::EMPTY);
-        _ghosts[ghostIndex] = ghostPos;
-        _grid.setPosition(ghostPos, Tools::GHOST);
-        return;
+    for (const auto& dir : directions) {
+        Tools::Vec2 wrapped = _grid.wrap(dir);
+        if (_grid.getPosition(wrapped) != Tools::WALL) {
+            validMoves.push_back(wrapped);
+        }
     }
-    else
-        PacMan::moveGhosts(ghostIndex);
+    if (!validMoves.empty()) {
+        std::uniform_int_distribution<size_t> dist(0, validMoves.size() - 1);
+        Tools::Vec2 newPos = validMoves[dist(_rng)];
+        _grid.setPosition(_ghosts[ghostIndex], Tools::EMPTY);
+        _ghosts[ghostIndex] = newPos;
+        _grid.setPosition(newPos, Tools::GHOST);
+    }
 }
 
 void PacMan::update(std::chrono::nanoseconds dt, Player& player)
@@ -252,8 +244,13 @@ void PacMan::update(std::chrono::nanoseconds dt, Player& player)
     auto nextCell = _grid.wrap(_pacman + _dir);
 
     for (int i = 0; i < 4; i++) {
-        if (_pacman == _ghosts[i])
-            _gameOver = true;
+        if (_pacman == _ghosts[i]) {
+            if (_superPac) {
+                eatGhosts();
+            } else {
+                _gameOver = true;
+            }
+        }
         if (_ghostFrozenUntil[i] < _accumulator)
             PacMan::moveGhosts(i);
     }
