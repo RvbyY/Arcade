@@ -384,6 +384,7 @@ ctest
 ## Acknowledgments
 
 - Credit `contributors: Mateoantoni, AdryzR, RvbyY`, `inspiration: arcade stations`, `references: School project`
+         `Interface collaborators group leaders: ` **pierre.cufer@epitech.eu** ` (selected as collaboration partner for grading), ` **christophe.dronne@epitech.eu**, **maryam.larsanova@epitech.eu**
 
 <div align="right">
 
