@@ -103,7 +103,7 @@ void Arcade::SelectMenu::render(IDisplay& display)
         const bool isSelectTypeed = _selected == SelectType::Graphics && isSelected;
         std::string label;
 
-        if (i < 9) {
+        if (i < 12) {
             label = "F" + std::to_string(i + 1) + " ";
         } else {
             label = "   ";
