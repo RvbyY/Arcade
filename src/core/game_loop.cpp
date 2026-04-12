@@ -33,6 +33,9 @@ bool Core::handleGlobalEvent(Arcade::Events::Event evt)
         return false;
     }
     switch (evt) {
+        case Arcade::Events::ARC_KEY_L:
+            cycleToNextDisplay();
+            return true;
         case Arcade::Events::ARC_KEY_G:
             cycleToNextGame();
             return true;

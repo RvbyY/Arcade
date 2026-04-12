@@ -31,8 +31,9 @@ static void printUsage()
     std::cout << "  ESC       -> Quit the game" << std::endl;
     std::cout << "  M         -> Return to the menu" << std::endl;
     std::cout << "  G         -> Switch to the next game" << std::endl;
+    std::cout << "  L         -> Switch to the next graphical library" << std::endl;
     std::cout << "  R         -> Restart the current game" << std::endl;
-    std::cout << "  F1...F12  -> Switch graphical library" << std::endl << std::endl;
+    std::cout << "  F1...F12  -> Select a graphical library" << std::endl << std::endl;
 
     std::cout << "*Select Menu*" << std::endl;
     std::cout << "  ESC       -> Go back to the username input menu" << std::endl;
@@ -109,6 +110,14 @@ void Core::switchToLoadedGame()
     if (!_games.empty()) {
         queueGameSwitch(_games[_selectedGameIndex].get());
     }
+}
+
+void Core::cycleToNextDisplay()
+{
+    if (_displays.empty()) {
+        return;
+    }
+    selectDisplay((_selectedDisplayIndex + 1) % _displays.size());
 }
 
 void Core::cycleToNextGame()

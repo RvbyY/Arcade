@@ -30,6 +30,7 @@ class Core {
     void switchToUserInputMenu();
     void switchToSelectMenu();
     void switchToLoadedGame();
+    void cycleToNextDisplay();
     void cycleToNextGame();
     bool selectDisplay(std::size_t index);
     bool selectGame(std::size_t index) noexcept;
