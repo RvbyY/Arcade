@@ -29,6 +29,10 @@ bool Core::handleGlobalEvent(Arcade::Events::Event evt)
         selectDisplay(*displayIndex);
         return true;
     }
+    if (evt == Arcade::Events::ARC_KEY_TAB) {
+        toggleLeaderboardVisibility();
+        return true;
+    }
     if (!isLoadedGameActive()) {
         return false;
     }
@@ -89,6 +93,9 @@ int Core::game_loop()
 
         _currDisplay->clear();
         _currGame->render(*_currDisplay);
+        if (_leaderboardVisible) {
+            _leaderboardOverlay.render(*_currDisplay);
+        }
         if (_debugOverlay) {
             _debugOverlay->render(*_currDisplay);
         }

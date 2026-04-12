@@ -15,6 +15,7 @@ Core::Core(int argc, char** argv)
     : _args(argv, argc)
     , _userInputMenu(*this)
     , _selectMenu(*this)
+    , _leaderboardOverlay(*this)
     , _debugOverlay()
     , _selectedDisplayIndex(0)
     , _selectedGameIndex(0)
@@ -44,6 +45,7 @@ static void printUsage()
     std::cout << "  ENTER     -> Confirm username and load the Selection Menu (requires at least one character)" << std::endl << std::endl;
 
     std::cout << "*Utils*" << std::endl;
+    std::cout << "  TAB       -> Toggle leaderboard overlay" << std::endl;
     std::cout << "  P         -> Toggle debug overlay (shows current libraries)" << std::endl;
 }
 
@@ -97,11 +99,13 @@ int Core::run()
 
 void Core::switchToUserInputMenu()
 {
+    setLeaderboardVisible(true);
     queueGameSwitch(&_userInputMenu);
 }
 
 void Core::switchToSelectMenu()
 {
+    setLeaderboardVisible(true);
     queueGameSwitch(&_selectMenu);
 }
 
@@ -180,6 +184,11 @@ const Arcade::Player& Core::getCurrentPlayer() const noexcept
     return *_currPlayer;
 }
 
+const PlayerContainer& Core::players() const noexcept
+{
+    return _players;
+}
+
 std::size_t Core::displayCount() const noexcept
 {
     return _displays.size();
@@ -219,6 +228,16 @@ std::string_view Core::gameTitle(std::size_t index) const noexcept
 bool Core::isLoadedGameActive() const noexcept
 {
     return _currGame != nullptr && _currGame != &_userInputMenu && _currGame != &_selectMenu;
+}
+
+void Core::setLeaderboardVisible(bool visible) noexcept
+{
+    _leaderboardVisible = visible;
+}
+
+void Core::toggleLeaderboardVisibility() noexcept
+{
+    _leaderboardVisible = !_leaderboardVisible;
 }
 
 void Core::queueGameSwitch(Arcade::IGame* nextGame)

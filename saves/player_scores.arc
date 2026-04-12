@@ -1,1 +1,1 @@
-azkokreez=2
+adryz=2
