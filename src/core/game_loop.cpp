@@ -29,6 +29,10 @@ bool Core::handleGlobalEvent(Arcade::Events::Event evt)
         selectDisplay(*displayIndex);
         return true;
     }
+    if (evt == Arcade::Events::ARC_KEY_TAB) {
+        toggleLeaderboardVisibility();
+        return true;
+    }
     if (!isLoadedGameActive()) {
         return false;
     }
@@ -85,10 +89,14 @@ int Core::game_loop()
         last = now;
 
         _currGame->update(dt, *_currPlayer);
+        updatePlayerScore();
         applyPendingGameSwitch();
 
         _currDisplay->clear();
         _currGame->render(*_currDisplay);
+        if (_leaderboardVisible) {
+            _leaderboardOverlay.render(*_currDisplay);
+        }
         if (_debugOverlay) {
             _debugOverlay->render(*_currDisplay);
         }
@@ -105,8 +113,8 @@ int Core::game_loop()
 
 void Core::updatePlayerScore()
 {
-    // check si le joueur a déjà un score enregistré dans le futur fichier
-    // et si oui, si son nouveau score est meilleur on l'enregistree
+    if (!_currPlayer)
+        return;
     _currPlayer->maxScore = std::max(_currPlayer->maxScore, _currPlayer->score);
     _currPlayer->score = 0;
     _players.save();
@@ -119,7 +127,6 @@ void Core::applyPendingGameSwitch()
         return;
     }
     _currGame->destroy();
-    updatePlayerScore();
     _currGame = _pendingGame;
     _pendingGame = nullptr;
     _currGame->init();

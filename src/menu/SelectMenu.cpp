@@ -76,6 +76,7 @@ void Arcade::SelectMenu::update(std::chrono::nanoseconds dt, Player& player)
         case Arcade::Event::ARC_KEY_RETURN:
         case Arcade::Event::ARC_KEY_SPACE:
             if (_core.gameCount() > 0) {
+                _core.setLeaderboardVisible(false);
                 _core.switchToLoadedGame();
             }
             break;

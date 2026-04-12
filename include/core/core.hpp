@@ -18,6 +18,7 @@
 #include "../menu/selectMenu.hpp"
 #include "../menu/userInputMenu.hpp"
 #include "overlays/debugOverlay.hpp"
+#include "overlays/leaderboardOverlay.hpp"
 #include "playerContainer/playerContainer.hpp"
 
 
@@ -41,6 +42,7 @@ class Core {
 
     Arcade::Player& getCurrentPlayer() noexcept;
     const Arcade::Player& getCurrentPlayer() const noexcept;
+    const PlayerContainer& players() const noexcept;
 
     std::size_t displayCount() const noexcept;
     std::size_t gameCount() const noexcept;
@@ -55,6 +57,8 @@ class Core {
 
 
     bool isLoadedGameActive() const noexcept;
+    void setLeaderboardVisible(bool visible) noexcept;
+    void toggleLeaderboardVisibility() noexcept;
 
     private:
     int game_loop();
@@ -94,6 +98,8 @@ class Core {
 
     Arcade::UserInputMenu _userInputMenu;
     Arcade::SelectMenu _selectMenu;
+    Arcade::LeaderboardOverlay _leaderboardOverlay;
+    bool _leaderboardVisible = true;
 
     std::optional<Arcade::DebugOverlay> _debugOverlay;
 };
