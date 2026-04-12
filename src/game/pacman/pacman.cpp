@@ -258,6 +258,12 @@ void PacMan::render(IDisplay& display)
     int offsetX = GHOST_ZONE_CENTER_X - GHOST_ZONE_WIDTH / 2;
     int offsetY = GHOST_ZONE_CENTER_Y - GHOST_ZONE_HEIGHT / 2;
 
+    Arcade::Text playerScoreText("Score: ");
+    playerScoreText.content += std::to_string(_gameScore);
+    playerScoreText.x = MAP_WIDTH + playerScoreText.content.length();
+    playerScoreText.y = MAP_HEIGHT;
+    display.draw(playerScoreText);
+
     for (long x = 0; x < MAP_WIDTH + 2; x++)
         for (long y = 0; y < MAP_HEIGHT + 2; y++)
             display.draw(Arcade::Shapes::Point(x, y, Arcade::Colors::BLACK));
