@@ -128,6 +128,12 @@ std::optional<Arcade::Event> SfmlGraphic::pollEvent()
         if (event.type == sf::Event::MouseMoved) {
             return Arcade::Events::ARC_MOUSE_MOVE;
         }
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.mouseButton.button == sf::Mouse::Left)
+                return Arcade::Events::ARC_MOUSE_LEFT_CLICK;
+            if (event.mouseButton.button == sf::Mouse::Right)
+                return Arcade::Events::ARC_MOUSE_RIGHT_CLICK;
+        }
         if (event.type == sf::Event::Closed) {
             return Arcade::Events::ARC_KEY_ESC;
         }

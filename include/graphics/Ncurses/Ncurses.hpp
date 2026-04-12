@@ -38,4 +38,5 @@ public:
 
 private:
     bool _isWinOpen = false;
+    std::pair<Arcade::Coordinate, Arcade::Coordinate> _mousePos = {0, 0};
 };
