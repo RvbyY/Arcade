@@ -324,11 +324,11 @@ ctest
 ## Roadmap
 
 - [X] **`Task 1`**: <strike>Implement libarcade.</strike>
-- [ ] **`Task 2`**: Pick two games.
-- [ ] **`Task 3`**: Make maths methods to display these games.
-- [ ] **`Task 4`**: Develop both games.
-- [ ] **`Task 5`**: Implement robustness and parsing tests.
-- [ ] **`Task 6`**: Implement games tests.
+- [X] **`Task 2`**: <strike>IPick two games.</strike>
+- [X] **`Task 3`**: <strike>IMake maths methods to display these games.</strike>
+- [X] **`Task 4`**: <strike>IDevelop both games.</strike>
+- [X] **`Task 5`**: <strike>IImplement robustness and parsing tests.</strike>
+- [ ] **`Task 6`**: IImplement games tests.
 
 ---
 
