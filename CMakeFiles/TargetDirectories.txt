@@ -1,0 +1,9 @@
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/arcade.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/libarcade.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/arcade_ncurses.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/arcade_sdl2.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/arcade_sfml.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/arcade_snake.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/arcade_pacman.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/edit_cache.dir
+/home/bassirou/delivery/tek2/OOP/arcade/G-OOP-400-STG-4-1-arcade-5/CMakeFiles/rebuild_cache.dir

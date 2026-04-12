@@ -1,0 +1,10 @@
+# Hashes of file build rules.
+0690b205e9c6847db117d15425028b6f CMakeFiles/libarcade
+331c797eacf5d91bc37641454e629d10 CMakeFiles/libarcade-complete
+daaa4ceabdcb7634bc1697b942d6df78 libarcade-prefix/src/libarcade-stamp/libarcade-build
+9bcadd7f737b3b9ce24d26e29cabac18 libarcade-prefix/src/libarcade-stamp/libarcade-configure
+ca591f557d2f203328555cd7ec86b45f libarcade-prefix/src/libarcade-stamp/libarcade-download
+d88c8cb9da6831704b55fa6f9ef1a181 libarcade-prefix/src/libarcade-stamp/libarcade-install
+ab32df2d50b0d98990adf4fb64202464 libarcade-prefix/src/libarcade-stamp/libarcade-mkdir
+e05440b7e1308b373a094478beb2363f libarcade-prefix/src/libarcade-stamp/libarcade-patch
+89ff5476d59062867c69317373880829 libarcade-prefix/src/libarcade-stamp/libarcade-update

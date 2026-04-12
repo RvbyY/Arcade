@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared -Wl,-soname,arcade_sdl2.so -o lib/arcade_sdl2.so CMakeFiles/arcade_sdl2.dir/src/graphics/SDL2/SDL2.cpp.o CMakeFiles/arcade_sdl2.dir/src/graphics/SDL2/SDL2KeySwitch.cpp.o  -lSDL2 -lSDL2_ttf 

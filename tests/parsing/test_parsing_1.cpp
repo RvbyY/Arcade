@@ -23,6 +23,9 @@
 #include <unistd.h>
 #include <fstream>
 
+// extern void __gcov_reset(void);
+// extern void __gcov_dump(void);
+
 bool isExist(std::string lib)
 {
 

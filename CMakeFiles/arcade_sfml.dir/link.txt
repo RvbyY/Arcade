@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared -Wl,-soname,arcade_sfml.so -o lib/arcade_sfml.so CMakeFiles/arcade_sfml.dir/src/graphics/SFML/SfmlGraphic.cpp.o CMakeFiles/arcade_sfml.dir/src/graphics/SFML/SfmlKeySwitch.cpp.o  -lsfml-graphics -lsfml-window -lsfml-system 
