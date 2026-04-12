@@ -1,8 +1,10 @@
 adryz=300
 bass=500
-ziedrox=4
-xXxPvpPlayerxXx=5000
+bob=137
+caca=126
+fazfazaf=0
 xXxPvpPlayer2xXx=450
 xXxPvpPlayer8xXx=450
 xXxPvpPlayer9xXx=450
-
+xXxPvpPlayerxXx=5000
+ziedrox=4

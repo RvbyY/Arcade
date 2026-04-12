@@ -134,6 +134,16 @@ std::optional<Arcade::Event> SDL2Graphic::pollEvent()
     if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
         return Arcade::Event::ARC_RESIZE;
 
+    if (event.type == SDL_MOUSEMOTION)
+        return Arcade::Events::ARC_MOUSE_MOVE;
+
+    if (event.type == SDL_MOUSEBUTTONDOWN) {
+        if (event.button.button == SDL_BUTTON_LEFT)
+            return Arcade::Events::ARC_MOUSE_LEFT_CLICK;
+        if (event.button.button == SDL_BUTTON_RIGHT)
+            return Arcade::Events::ARC_MOUSE_RIGHT_CLICK;
+    }
+
     if (event.type == SDL_KEYDOWN)
         return KeySwitch(event.key.keysym.sym);
 

@@ -64,6 +64,7 @@ void NcursesGraphic::open()
     nodelay(_window, TRUE); // non-blocking input
     curs_set(0);
     set_escdelay(5);
+    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
 
     if (has_colors()) {
         static constexpr Arcade::Color palette[] = {
@@ -152,12 +153,24 @@ std::optional<Arcade::Event> NcursesGraphic::pollEvent()
 {
     int ch = wgetch(_window);
 
+    if (ch == KEY_MOUSE) {
+        MEVENT event;
+        if (getmouse(&event) == OK) {
+            _mousePos = {static_cast<Arcade::Coordinate>(event.x), static_cast<Arcade::Coordinate>(event.y)};
+            if (event.bstate & (BUTTON1_PRESSED | BUTTON1_RELEASED | BUTTON1_CLICKED))
+                return Arcade::Events::ARC_MOUSE_LEFT_CLICK;
+            if (event.bstate & (BUTTON3_PRESSED | BUTTON3_RELEASED | BUTTON3_CLICKED))
+                return Arcade::Events::ARC_MOUSE_RIGHT_CLICK;
+            return Arcade::Events::ARC_MOUSE_MOVE;
+        }
+    }
+
     return NcursesGraphic::KeySwitch(ch);
 }
 
 std::pair<Arcade::Coordinate, Arcade::Coordinate> NcursesGraphic::mousePosition() const
 {
-    return {0, 0};
+    return _mousePos;
 }
 
 std::pair<Arcade::Coordinate, Arcade::Coordinate> NcursesGraphic::size() const noexcept
